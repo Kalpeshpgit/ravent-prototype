@@ -1,0 +1,573 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ravent">
+<meta name="theme-color" content="#0A0A0A">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20180%20180%27%3E%3Crect%20width%3D%27180%27%20height%3D%27180%27%20rx%3D%2740%27%20fill%3D%27%230A0A0A%27%2F%3E%3Cg%20transform%3D%27translate%2858%2C30%29%20scale%281.1044%29%27%3E%3Cpath%20d%3D%27M%200%200%20L%2045.64%200%20C%2066.59%200%2078.24%2015.37%2078.24%2032.75%20C%2078.24%2050.61%2066.13%2062.4%2051.23%2064.58%20L%2044.86%2064.58%20L%2079.32%20108.66%20L%2068.77%20108.66%20L%2029.65%2057.59%20L%2042.84%2057.59%20C%2058.05%2057.59%2069.39%2048.28%2069.39%2032.75%20C%2069.39%2019.56%2061.47%208.07%2045.17%208.07%20L%208.69%208.07%20L%208.69%20108.66%20L%200%20108.66%20Z%20M%200%200%20%27%20fill%3D%27%23FFFFFF%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+<title>Ravent — prototype</title>
+<style>
+*{-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%;background:#0A0A0A;overscroll-behavior:none}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;user-select:none}
+#probe{position:fixed;top:0;left:0;width:0;height:0;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#stage{position:fixed;inset:0;overflow:hidden}
+#scaler{position:absolute;top:0;left:0;width:260px;transform-origin:top left}
+.screen{width:260px;box-sizing:border-box;background:#0A0A0A;
+  display:flex;flex-direction:column;overflow:hidden}
+.screen[hidden]{display:none}
+.screen.enter{animation:sl .26s cubic-bezier(.22,.61,.36,1)}
+.screen.back{animation:sr .26s cubic-bezier(.22,.61,.36,1)}
+@keyframes sl{from{opacity:0;transform:translateX(11px)}to{opacity:1;transform:none}}
+@keyframes sr{from{opacity:0;transform:translateX(-11px)}to{opacity:1;transform:none}}
+.s-nav .hot{display:inline-block;border-radius:5px;padding:1px 3px}
+.s-duo .hot{border-radius:5px}
+.s-body.hot{padding:2px 4px;margin-left:-4px}
+.screen{background:#0A0A0A;
+  padding:13px 14px 12px;display:flex;flex-direction:column;overflow:hidden;}
+/* ── auth screens ──────────────────────────────────────────── */
+.s-btn.prov{display:flex;align-items:center;justify-content:center;gap:7px;position:relative}
+.s-mark{flex:0 0 auto;display:block}
+.s-link{text-align:center;font-size:8.5px;font-weight:600;color:#C9C5BE;padding:8px;
+  margin-bottom:5px;flex:0 0 auto;position:relative;border-bottom:1px solid #232120}
+.s-inp{background:#161514;border:1px solid #232120;border-radius:7px;padding:6px 9px;
+  margin-bottom:7px;flex:0 0 auto}
+.s-inp i{display:block;font-style:normal;font-size:5.8px;font-weight:700;letter-spacing:.17em;
+  color:#6C6862;margin-bottom:2px}
+.s-inp span{font-size:8.5px;color:#EDEAE4}
+.s-inp span.mono{letter-spacing:.14em}
+.s-tog{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:6px 2px;margin-bottom:5px;flex:0 0 auto;position:relative}
+.s-tog span{font-size:8px;color:#B7B3AC}
+.s-tog b{width:20px;height:11px;border-radius:6px;background:#2A2827;position:relative;flex:0 0 auto}
+.s-tog b:after{content:"";position:absolute;top:1.5px;left:1.5px;width:8px;height:8px;
+  border-radius:50%;background:#6C6862}
+.s-tog b.on{background:#B7B4A3}
+.s-tog b.on:after{left:10.5px;background:#0A0A0A}
+.s-sheet{background:#F7F5F1;border-radius:10px;padding:9px 10px;flex:0 0 auto;color:#1A1A1A}
+.s-sh-h{font-size:9.5px;font-weight:700;color:#1A1A1A;margin-bottom:7px}
+.s-sh-h em{display:block;font-style:normal;font-size:7.5px;font-weight:400;color:#6A6A6A;margin-top:1px}
+.s-acct{display:flex;align-items:center;gap:7px;padding:5px 4px;border-radius:5px;position:relative}
+.s-acct+.s-acct{border-top:1px solid #E3DFD6}
+.s-acct b{width:16px;height:16px;border-radius:50%;background:#3A3A3A;color:#fff;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;font-size:7.5px;font-weight:700}
+.s-acct span{font-size:8px;color:#1A1A1A;line-height:1.3}
+.s-acct em{display:block;font-style:normal;font-size:7px;color:#7A7A7A}
+.s-acct.add b{background:none;border:1px dashed #B9B5AC;color:#7A7A7A}
+.s-opt{display:flex;align-items:flex-start;gap:7px;padding:5px 4px;border-top:1px solid #E3DFD6}
+.s-opt b{width:11px;height:11px;border-radius:50%;border:1.4px solid #B9B5AC;flex:0 0 auto;margin-top:1px}
+.s-opt b.on{border-color:#1A1A1A;background:radial-gradient(#1A1A1A 0 42%,transparent 44%)}
+.s-opt span{font-size:8px;color:#1A1A1A;line-height:1.3}
+.s-opt em{display:block;font-style:normal;font-size:7px;color:#7A7A7A}
+.s-sh-f{display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;
+  border-top:1px solid #E3DFD6;position:relative}
+.s-sh-f span{font-size:8.5px;font-weight:700;color:#1A1A1A}
+.s-face{flex:0 0 auto;line-height:0}
+.s-inp.on{border-color:#3E3A34;background:#191817}
+.s-inp .caret{display:inline-block;width:1px;height:9px;background:#B7B4A3;margin-left:1px;
+  vertical-align:-1px;font-style:normal}
+.s-kbd{margin:0 -14px -12px;background:#1B1A19;border-top:1px solid #2A2827;
+  padding:7px 5px 9px;border-radius:0 0 24px 24px;flex:0 0 auto}
+.s-kbd .r{display:flex;gap:2.5px;margin-bottom:4px;align-items:stretch}
+.s-kbd .r.pad{padding:0 7px}
+.s-kbd .r:last-child{margin-bottom:0}
+.s-kbd b{flex:1;height:14px;border-radius:2.5px;background:#33302D}
+.s-kbd b.w{flex:1.4}
+.s-kbd b.w2{flex:1.6}
+.s-kbd b.sp{flex:4}
+.s-kbd u{flex:2.4;height:14px;border-radius:2.5px;background:#B7B4A3;color:#0A0A0A;
+  text-decoration:none;font-size:6.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:center;position:relative}
+.s-div{display:flex;align-items:center;gap:8px;margin:5px 0 7px;flex:0 0 auto}
+.s-div i{flex:1;height:1px;background:#232120}
+.s-div span{font-size:6.5px;font-weight:700;letter-spacing:.19em;color:#6C6862;text-transform:uppercase}
+.s-sys{font-size:7px;line-height:1.5;font-style:italic;color:#7E7A73;
+  border-left:2px solid #3A3A3A;padding-left:6px;flex:0 0 auto}
+/* ── inside the phone ──────────────────────────────────────── */
+.screen *{box-sizing:border-box}
+.s-wm{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex:0 0 auto}
+.s-wm .rv-logo{display:block;color:#FFFFFF;flex:0 0 auto}
+.s-wm em{font-size:7.5px;font-style:normal;color:#7E7A73;letter-spacing:.04em}
+.s-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;flex:0 0 auto}
+.s-nav span{font-size:7px;font-weight:700;letter-spacing:.16em;color:#A8A49C}
+.s-nav i{font-size:7px;font-style:normal;font-weight:700;letter-spacing:.16em;color:#7E7A73}
+.s-eye{font-size:6.5px;font-weight:700;letter-spacing:.19em;color:#7E7A73;margin:9px 0 5px;flex:0 0 auto}
+.s-disp{font-size:16.5px;line-height:1.2;font-weight:300;color:#F7F5F1;letter-spacing:-.2px;margin-bottom:6px;flex:0 0 auto}
+.s-disp.sm{font-size:14px}
+.s-body{font-size:8px;line-height:1.5;color:#A29E96;margin-bottom:7px;flex:0 0 auto}
+.s-hint{font-size:7.5px;line-height:1.5;color:#7E7A73;margin-top:6px;flex:0 0 auto}
+/* ── the three iOS controls ───────────────────────────── */
+/* circular translucent back / close, as the system draws them */
+.s-rndrow{display:flex;align-items:center;gap:7px;flex:0 0 auto;margin-bottom:8px}
+.s-rndrow.end{justify-content:flex-end}
+.s-rndrow.both{justify-content:space-between}
+.s-rnd{position:relative;display:inline-flex;align-items:center;justify-content:center;
+  width:19px;height:19px;border-radius:50%;background:rgba(255,255,255,.10);
+  color:#E9E6E1;font-style:normal;font-size:11px;line-height:1;font-weight:400;
+  flex:0 0 auto;backdrop-filter:blur(6px)}
+.s-rnd.x{font-size:8.5px}
+.s-rndlab{font-size:7px;font-weight:700;letter-spacing:.16em;color:#A8A49C}
+.s-rndlab.mid{flex:1 1 auto;text-align:left;margin-left:-3px}
+.s-skip{position:relative;font-size:7px;font-style:normal;font-weight:700;letter-spacing:.16em;
+  color:#A8A49C;flex:0 0 auto}
+/* the bottom bar — only on the four top-level destinations */
+.s-tabbar{display:flex;align-items:stretch;gap:2px;flex:0 0 auto;margin:9px -13px -13px;
+  padding:7px 6px 9px;border-top:1px solid rgba(255,255,255,.07);
+  background:rgba(20,19,18,.92);backdrop-filter:blur(10px)}
+.s-tab{position:relative;flex:1 1 0;display:flex;flex-direction:column;align-items:center;
+  gap:3px;color:#6C6862;padding:1px 0}
+.s-tab svg{width:13px;height:13px;display:block}
+.s-tab span{font-size:5.6px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  white-space:nowrap}
+.s-tab.on{color:#F2EFEA}
+.s-tab.on:before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+  width:15px;height:2px;background:var(--gold);border-radius:1px}
+/* the close control — one look everywhere it appears */
+.s-x{position:relative;display:inline-flex;align-items:center;justify-content:center;
+  width:13px;height:13px;font-size:9px;font-style:normal;font-weight:400;line-height:1;
+  letter-spacing:0;color:#9A958D}
+.s-wm .s-x,.s-nav .s-x{color:#9A958D}
+.s-nav span.hot{position:relative;display:inline-block}
+.s-tiny{font-size:6.5px;letter-spacing:.05em;color:#6C6862;text-align:center;margin-top:6px;flex:0 0 auto}
+.s-syscx{font-size:8px;letter-spacing:.06em;color:#8E8A83;text-align:center;
+  padding:9px 0 2px;flex:0 0 auto}
+.s-pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:6px;line-height:1.65;
+  color:#B9B4AC;background:#141312;border:1px solid #232120;border-radius:9px;
+  padding:9px 10px;margin-top:2px;flex:0 1 auto;overflow:hidden;letter-spacing:.01em}
+.s-gap{flex:1 1 auto;min-height:4px}
+.s-rule{height:1px;background:#232120;margin:8px 0;flex:0 0 auto}
+/* ambient entry (02·alt) and the drawer it opens (02.A) */
+.s-ic{display:block}
+.s-centre{font-size:13px;line-height:1.32;letter-spacing:-.012em;color:#EDEAE4;
+  text-align:center;padding:0 14px;flex:0 0 auto}
+.s-starts{display:flex;flex-direction:column;align-items:center;gap:5px;
+  margin-top:13px;flex:0 0 auto}
+/* the solve thread — messages and tappable replies */
+.s-bub{max-width:84%;align-self:flex-start;margin-bottom:5px;padding:6px 9px;
+  border-radius:12px 12px 12px 4px;background:#141312;border:1px solid #201E1D;
+  font-size:8px;line-height:1.5;color:#D8D4CE;flex:0 0 auto}
+.s-bub.me{align-self:flex-end;border-radius:12px 12px 4px 12px;
+  background:#232120;border-color:#2C2928;color:#EDEAE4}
+.s-bub em{display:block;margin-top:3px;font-size:6.5px;font-style:normal;
+  letter-spacing:.05em;color:#7E7A73}
+.s-quicks{display:flex;flex-wrap:wrap;gap:4px;margin:3px 0 2px;flex:0 0 auto}
+.s-qk{position:relative;padding:4px 9px;border-radius:999px;border:1px solid #2C2928;
+  font-size:7.5px;color:#B7B4A3;letter-spacing:-.002em}
+.s-start{position:relative;padding:6px 13px;border-radius:999px;background:transparent;
+  border:1px solid #2C2928;max-width:92%}
+.s-start>span{display:flex;flex-direction:column;align-items:center;gap:1px;
+  font-size:8px;color:#D8D4CE;letter-spacing:-.004em;text-align:center}
+.s-start em{font-size:6.5px;font-style:normal;color:#7E7A73;letter-spacing:.03em}
+.s-resume{position:relative;display:flex;align-items:baseline;gap:5px;
+  padding:6px 2px 7px;border-top:1px solid #1E1C1B;flex:0 0 auto}
+.s-resume b{font-size:6.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+  color:#B7B4A3}
+.s-resume span{font-size:7.5px;color:#9A958D;letter-spacing:.01em}
+.s-comp{position:relative;display:flex;align-items:center;gap:6px;margin-top:8px;
+  padding:8px 9px;border-radius:13px;background:#141312;border:1px solid #262322;flex:0 0 auto}
+.s-comp span:first-child{flex:1;font-size:7.5px;color:#6E6A64}
+.s-comp .s-tool{display:inline-flex;align-items:center;justify-content:center;
+  width:19px;height:19px;border-radius:50%;flex:0 0 auto;color:#9A958D;
+  background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.045)}
+.s-comp .s-tool+.s-tool{margin-left:1px}
+.s-ic2{display:block}
+.s-mrow{position:relative;display:flex;align-items:center;justify-content:space-between;
+  padding:7px 2px;flex:0 0 auto}
+.s-mrow>span:first-child{display:flex;flex-direction:column;gap:2px;
+  font-size:8.5px;color:#EDEAE4;letter-spacing:-.006em}
+.s-mrow em{font-size:7px;font-style:normal;color:#7E7A73;letter-spacing:.02em}
+.s-pill{display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:20px;
+  background:#141312;border:1px solid #262322;flex:0 0 auto}
+.s-pill b{width:15px;height:15px;border-radius:50%;background:#2A2726;color:#D8D4CE;
+  font-size:6px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.s-pill span{font-size:7.5px;color:#9A958D}
+.s-card{position:relative;background:#161514;border:1px solid #232120;border-radius:8px;
+  padding:8px 9px;margin-bottom:6px;flex:0 0 auto}
+.s-ct{font-size:8.5px;font-weight:700;color:#EDEAE4;line-height:1.4}
+.s-cs{font-size:7.5px;color:#8B8781;margin-top:2px;line-height:1.45}
+.s-chev{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:#6C6862;font-size:11px}
+.s-quote{background:#141312;border-radius:7px;padding:7px 8px;margin-bottom:7px;flex:0 0 auto}
+.s-quote div{font-size:8px;color:#D8D4CE;line-height:1.4}
+.s-quote em{display:block;font-size:6.5px;font-style:normal;color:#7E7A73;margin-top:3px;letter-spacing:.03em}
+.s-btn{border-radius:7px;padding:8px;text-align:center;font-size:8.5px;font-weight:700;
+  margin-bottom:5px;flex:0 0 auto;background:#F7F5F1;color:#0A0A0A}
+.s-btn.dark{background:#1C1B1A;color:#E8E5E0;border:1px solid #2A2827}
+.s-field{background:#161514;border:1px solid #232120;border-radius:6px;padding:7px 8px;
+  font-size:7.5px;color:#6C6862;margin-bottom:7px;flex:0 0 auto}
+.s-area{background:#161514;border:1px solid #232120;border-radius:8px;padding:8px 9px;
+  font-size:7.5px;color:#6C6862;height:58px;margin-bottom:7px;flex:0 0 auto}
+.s-duo{display:flex;gap:6px;margin-bottom:7px;flex:0 0 auto}
+.s-duo span{flex:1;background:#161514;border:1px solid #232120;border-radius:6px;padding:6px;
+  text-align:center;font-size:7.5px;color:#B7B3AC}
+.s-duo span:last-child{color:#8B8781}
+.s-chip{background:#141312;border:1px solid #201F1E;border-radius:5px;padding:5px 7px;
+  font-size:7.5px;color:#B7B3AC;margin-bottom:4px;flex:0 0 auto}
+.s-meta{font-size:7px;color:#7E7A73;line-height:1.7;flex:0 0 auto}
+/* the camera: a viewfinder, a reticle that locks on, and two round controls */
+.s-vf{position:relative;flex:1 1 auto;min-height:96px;border-radius:8px;margin-bottom:7px;
+  background:linear-gradient(155deg,#2A2724 0%,#1C1A18 46%,#141312 100%);overflow:hidden}
+.s-vf .shelf{position:absolute;left:8%;right:8%;top:56%;height:14%;border-radius:2px;
+  background:linear-gradient(180deg,#4A4640,#332F2B)}
+.s-vf .obj{position:absolute;left:19%;right:19%;top:34%;height:22%;border-radius:4px;
+  background:linear-gradient(180deg,#0E0D0C,#000)}
+.s-ret{position:absolute;left:15%;right:15%;top:29%;height:32%}
+.s-ret i{position:absolute;width:9px;height:9px;border:1.4px solid #FFFDF8}
+.s-ret i:nth-child(1){left:0;top:0;border-right:none;border-bottom:none}
+.s-ret i:nth-child(2){right:0;top:0;border-left:none;border-bottom:none}
+.s-ret i:nth-child(3){left:0;bottom:0;border-right:none;border-top:none}
+.s-ret i:nth-child(4){right:0;bottom:0;border-left:none;border-top:none}
+.s-ret em{position:absolute;left:0;bottom:-13px;font-style:normal;font-size:6px;
+  letter-spacing:.12em;color:#B7B4A3}
+.s-cam{display:flex;align-items:center;justify-content:center;gap:16px;padding:2px 0 4px;flex:0 0 auto}
+.s-cbtn{position:relative;width:26px;height:26px;border-radius:50%;background:#201F1E;
+  border:1px solid #302E2C;display:flex;align-items:center;justify-content:center;color:#E2DFD9}
+.s-cbtn.big{width:34px;height:34px;background:#FFFDF8;color:#141312;border-color:#FFFDF8}
+.s-cbtn svg{width:12px;height:12px}
+.s-cbtn.big svg{width:14px;height:14px}
+.s-match{position:relative;display:flex;gap:7px;align-items:center;background:#161514;
+  border:1px solid #232120;border-radius:8px;padding:7px;margin-bottom:5px;flex:0 0 auto}
+.s-match .thumb{width:30px;height:24px;border-radius:3px;flex:0 0 auto;
+  background:linear-gradient(160deg,#3A3733,#111)}
+.s-match b{font-size:8.5px;font-weight:700;color:#EDEAE4;display:block;line-height:1.35}
+.s-match em{font-style:normal;font-size:7px;color:#8B8781;display:block;margin-top:1px}
+.s-match .conf{font-size:6px;font-weight:700;letter-spacing:.12em;color:#141312;
+  background:#B7B4A3;border-radius:2px;padding:2px 4px;margin-left:auto;flex:0 0 auto}
+.s-match .conf.lo{background:#3A3733;color:#B7B4A3}
+/* the system photo picker: a grid, and the banner iOS puts above it when the
+   app may only read what the person selects */
+.s-pnav{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex:0 0 auto}
+.s-pnav .seg{display:flex;background:#201F1E;border-radius:99px;padding:2px}
+.s-pnav .seg b{font-size:7px;font-weight:700;color:#8B8781;padding:3px 8px;border-radius:99px}
+.s-pnav .seg b.on{background:#3A3733;color:#EDEAE4}
+.s-pbanner{background:#161514;border:1px solid #232120;border-radius:7px;padding:6px 7px;
+  margin-bottom:6px;flex:0 0 auto}
+.s-pbanner b{display:block;font-size:8px;font-weight:700;color:#EDEAE4;line-height:1.35}
+.s-pbanner em{display:block;font-style:normal;font-size:7px;color:#8B8781;margin-top:2px;line-height:1.45}
+.s-pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;flex:0 0 auto}
+.s-pgrid i{position:relative;padding-top:100%;border-radius:2px;
+  background:linear-gradient(150deg,#3A3733,#1A1917)}
+.s-pgrid i:nth-child(3n){background:linear-gradient(150deg,#2E2B27,#151412)}
+.s-pgrid i:nth-child(4){background:linear-gradient(150deg,#46423B,#22201D)}
+.s-pgrid i.sel::after{content:"\2713";position:absolute;right:3px;bottom:2px;
+  font-size:8px;color:#141312;background:#FFFDF8;border-radius:50%;width:11px;height:11px;
+  display:flex;align-items:center;justify-content:center}
+.s-prog{display:flex;gap:3px;margin-bottom:8px;flex:0 0 auto}
+.s-prog i{flex:1;height:2px;background:#232120;border-radius:1px}
+.s-prog i.on{background:#B7B4A3}
+.s-grp{background:#141312;border-radius:8px;padding:7px 8px;margin-bottom:6px;flex:0 0 auto}
+.s-gl{font-size:6px;font-weight:700;letter-spacing:.17em;color:#6C6862;margin-bottom:5px}
+.s-row{display:flex;justify-content:space-between;align-items:center;padding:3.5px 0}
+.s-row span{font-size:8px;color:#E2DFD9}
+.s-row em{display:block;font-size:6.5px;font-style:italic;color:#6C6862}
+.s-row b{font-size:6px;font-weight:700;letter-spacing:.1em}
+.s-row b.hi{color:#8FA98F}
+.s-row b.md{color:#B7B4A3}
+.s-row b.lo{color:#7E7A73}
+.s-row b.tag{color:#8B8781;letter-spacing:.09em}
+.s-av{display:flex;gap:8px;align-items:center;flex:0 0 auto}
+.s-avc{width:26px;height:26px;border-radius:50%;background:#1F1E1C;border:1px solid #2C2A28;
+  display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#B7B4A3}
+.s-avn{font-size:9px;font-weight:700;color:#EDEAE4}
+.s-avr{font-size:7px;color:#7E7A73}
+.s-msg{margin-bottom:8px;flex:0 0 auto}
+.s-mh{font-size:5.8px;font-weight:700;letter-spacing:.15em;color:#6C6862;margin-bottom:3px}
+.s-mb{font-size:8px;line-height:1.5;color:#D2CEC8;background:#161514;border-radius:7px;padding:7px 8px}
+.s-msg.me .s-mb{background:#1E1D1B;color:#B7B3AC}
+.s-check{width:22px;height:22px;border-radius:50%;background:#F7F5F1;color:#0A0A0A;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-bottom:9px;flex:0 0 auto}
+/* taps: no spec badges, no dashed outlines — a brief pulse instead */
+.s-ex{display:none!important}          /* spec annotation — needed in the DOM, never shown */
+.hot{position:relative;outline:none!important;cursor:pointer}
+.s-nav span.hot,.s-nav .s-x,.s-wm .s-x,.s-tiny.hot,.s-syscx,
+.s-kbd u.hot,.s-comp .s-tool,.s-qk.hot,.s-start.hot{position:relative}
+.s-nav span.hot::after,.s-nav .s-x::after,.s-wm .s-x::after,
+.s-tiny.hot::after,.s-syscx::after,.s-qk.hot::after,.s-start.hot::after{
+  content:"";position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);width:max(100%,30px);height:30px}   /* ≈ 44pt once scaled */
+/* the keyboard action key: small by nature, so the target reaches well past it */
+.s-kbd u.hot::after{content:"";position:absolute;left:-7px;right:-7px;top:-10px;bottom:-9px}
+.hot:active{opacity:.55}
+body.taps .hot{outline:1px dashed rgba(183,180,163,.55)!important;outline-offset:2px;border-radius:6px}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(183,180,163,0)}
+  35%{box-shadow:0 0 0 3px rgba(183,180,163,.30)}}
+.screen.enter .hot{animation:pulse 1.15s ease .18s 1}
+/* the provenance tag */
+#mark{position:fixed;z-index:6;display:none;align-items:center;gap:5px;
+  padding:4px 9px;border-radius:99px;font-size:9px;letter-spacing:.09em;font-weight:700;
+  background:rgba(10,10,10,.82);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(9px)}
+#mark.on{display:inline-flex}
+#mark b{width:6px;height:6px;border-radius:50%}
+#mark.gap  b{background:#D9862B} #mark.gap  {color:#E9A85E}
+#mark.ours b{background:#3B7DD8} #mark.ours {color:#7FA9E4}
+/* prototype shell — not part of the app */
+#bar{position:fixed;left:0;right:0;bottom:0;z-index:9;display:flex;align-items:center;gap:6px;
+  padding:7px 12px;background:rgba(14,14,14,.86);backdrop-filter:blur(16px);
+  border-top:1px solid rgba(255,255,255,.09);transition:transform .22s ease;
+  font-size:11px;color:#9A958D}
+#bar.hide{transform:translateY(115%)}
+#bar button{font:inherit;color:#C9C4BC;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);
+  border-radius:8px;padding:6px 10px;letter-spacing:.02em}
+#bar button:active{background:rgba(255,255,255,.16)}
+#bar button.on{background:#B7B4A3;border-color:#B7B4A3;color:#161310;font-weight:700}
+#nx{white-space:nowrap}
+#nx.urge{background:#3B7DD8;border-color:#3B7DD8;color:#fff;font-weight:700;
+  animation:nxp 1.6s ease-in-out 3}
+@keyframes nxp{0%,100%{box-shadow:0 0 0 0 rgba(59,125,216,0)}
+  50%{box-shadow:0 0 0 5px rgba(59,125,216,.32)}}
+#sw{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.12)}
+#sw button{border:none;border-radius:0;padding:6px 9px;font-size:10px;letter-spacing:.06em}
+#now{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:10px;letter-spacing:.04em;color:#7E7A73}
+#grip{position:fixed;left:0;right:0;bottom:0;height:26px;z-index:8}
+#dead{position:fixed;left:50%;transform:translateX(-50%);z-index:7;
+  padding:9px 15px;border-radius:99px;font-size:11px;background:rgba(10,10,10,.9);
+  color:#B7B4A3;border:1px solid rgba(183,180,163,.35);opacity:0;transition:opacity .2s;pointer-events:none}
+#dead.on{opacity:1}
+#sheet{position:fixed;inset:0;z-index:11;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);
+  display:none;align-items:flex-end}
+#sheet.on{display:flex}
+#sheetin{width:100%;max-height:76%;overflow:auto;-webkit-overflow-scrolling:touch;
+  background:#141312;border-top-left-radius:18px;border-top-right-radius:18px;
+  padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
+#sheetin h4{margin:0 0 12px;font-size:12px;letter-spacing:.13em;color:#EDEAE4;font-weight:700}
+#sheetin h4 em{display:block;margin-top:5px;font-size:10px;font-style:normal;font-weight:400;
+  letter-spacing:.01em;line-height:1.5;color:#7E7A73}
+#list{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ix{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:9px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.ix:active{background:rgba(255,255,255,.13)}
+.ix b{font-size:10px;letter-spacing:.05em;color:#B7B4A3}
+.ix span{font-size:10px;color:#D8D4CE;line-height:1.35}
+.ix i{font-size:8.5px;font-style:normal;letter-spacing:.08em;color:#7E7A73}
+.ix.a b{color:#D9A24E} .ix.b b{color:#7FA9E4}
+</style></head><body>
+<div id="probe"></div>
+<div id="stage"><div id="scaler"><div class="screen" data-step="01" hidden><div class="s-wm"><svg class="rv-logo" viewBox="0 0 1156.94 108.66" height="7" width="74.53" preserveAspectRatio="xMinYMid meet" aria-label="Ravent"><path d="M 0 0 L 45.64 0 C 66.59 0 78.24 15.37 78.24 32.75 C 78.24 50.61 66.13 62.4 51.23 64.58 L 44.86 64.58 L 79.32 108.66 L 68.77 108.66 L 29.65 57.59 L 42.84 57.59 C 58.05 57.59 69.39 48.28 69.39 32.75 C 69.39 19.56 61.47 8.07 45.17 8.07 L 8.69 8.07 L 8.69 108.66 L 0 108.66 Z M 0 0 " fill="currentColor"/><path d="M 250.23 0 L 263.12 0 L 306.74 108.66 L 297.58 108.66 L 286.09 80.57 L 245.57 80.57 L 240.92 72.5 L 283.3 72.5 L 256.6 6.52 L 215 108.66 L 205.84 108.66 Z M 250.23 0 " fill="currentColor"/><path d="M 414.47 0 L 423.63 0 L 463.05 101.21 L 502.8 0 L 511.8 0 L 469.42 108.66 L 456.69 108.66 Z M 414.47 0 " fill="currentColor"/><path d="M 662.06 100.44 L 716.39 100.44 L 716.39 108.66 L 666.88 108.66 Z M 641.57 0 L 716.39 0 L 716.39 8.23 L 650.27 8.23 L 650.27 50.3 L 710.19 50.3 L 710.19 58.21 L 650.27 58.21 L 650.27 108.66 L 641.57 108.66 Z M 641.57 0 " fill="currentColor"/><path d="M 851.13 0 L 864.79 0 L 930.3 100.59 L 930.3 0 L 938.84 0 L 938.84 108.66 L 925.18 108.66 L 859.67 7.61 L 859.67 108.66 L 851.13 108.66 Z M 851.13 0 " fill="currentColor"/><path d="M 1110.21 8.23 L 1071.09 8.23 L 1071.09 0 L 1156.94 0 L 1156.94 8.23 L 1113.01 8.23 L 1119.06 18.79 L 1119.06 108.66 L 1110.21 108.66 Z M 1110.21 8.23 " fill="currentColor"/></svg></div><div class="s-gap" style="flex:2"></div><div class="s-disp">A quieter home.</div><div class="s-body">Ravent helps when something stops working. One tap to get started.</div><div class="s-gap" style="flex:2"></div><div class="s-btn prov hot" data-exit="1"><svg class="s-mark" width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.06 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h6.19c-.27 1.44-1.08 2.66-2.3 3.48v2.9h3.72c2.18-2 3.45-4.96 3.45-8.39z"/><path fill="#34A853" d="M12 24c3.11 0 5.72-1.03 7.62-2.79l-3.72-2.9c-1.03.69-2.35 1.1-3.9 1.1-3 0-5.54-2.03-6.45-4.75H1.7v2.99A11.99 11.99 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.55 14.66A7.2 7.2 0 0 1 5.17 12c0-.92.16-1.82.38-2.66V6.35H1.7A12 12 0 0 0 .43 12c0 1.94.46 3.77 1.27 5.65l3.85-2.99z"/><path fill="#EA4335" d="M12 4.77c1.69 0 3.21.58 4.4 1.72l3.3-3.3C17.71 1.19 15.1 0 12 0 7.39 0 3.4 2.64 1.7 6.35l3.85 2.99C6.46 6.8 9 4.77 12 4.77z"/></svg><span>Continue with Google</span><span class="s-ex" data-exit="1">1</span></div><div class="s-btn prov hot" data-exit="2"><svg class="s-mark" width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path fill="#0A0A0A" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg><span>Continue with Apple</span><span class="s-ex" data-exit="2">2</span></div><div class="s-div"><i></i><span>or</span><i></i></div><div class="s-inp on"><i>EMAIL</i><span>justin.tate@gmail.com<em class="caret"></em></span></div><div class="s-hint">We’ll email you a link — no password to make up.</div><div class="s-tiny">By continuing you agree to our Terms and Privacy.</div><div class="s-gap" style="flex:1"></div><div class="s-kbd"><div class="r"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div><div class="r pad"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div><div class="r"><b class="w"></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b class="w"></b></div><div class="r"><b class="w2"></b><b class="sp"></b><u class="go hot" data-exit="3">go<span class="s-ex" data-exit="3">3</span></u></div></div></div>
+<div class="screen" data-step="01.A" hidden><div class="s-wm"><svg class="rv-logo" viewBox="0 0 1156.94 108.66" height="7" width="74.53" preserveAspectRatio="xMinYMid meet" aria-label="Ravent"><path d="M 0 0 L 45.64 0 C 66.59 0 78.24 15.37 78.24 32.75 C 78.24 50.61 66.13 62.4 51.23 64.58 L 44.86 64.58 L 79.32 108.66 L 68.77 108.66 L 29.65 57.59 L 42.84 57.59 C 58.05 57.59 69.39 48.28 69.39 32.75 C 69.39 19.56 61.47 8.07 45.17 8.07 L 8.69 8.07 L 8.69 108.66 L 0 108.66 Z M 0 0 " fill="currentColor"/><path d="M 250.23 0 L 263.12 0 L 306.74 108.66 L 297.58 108.66 L 286.09 80.57 L 245.57 80.57 L 240.92 72.5 L 283.3 72.5 L 256.6 6.52 L 215 108.66 L 205.84 108.66 Z M 250.23 0 " fill="currentColor"/><path d="M 414.47 0 L 423.63 0 L 463.05 101.21 L 502.8 0 L 511.8 0 L 469.42 108.66 L 456.69 108.66 Z M 414.47 0 " fill="currentColor"/><path d="M 662.06 100.44 L 716.39 100.44 L 716.39 108.66 L 666.88 108.66 Z M 641.57 0 L 716.39 0 L 716.39 8.23 L 650.27 8.23 L 650.27 50.3 L 710.19 50.3 L 710.19 58.21 L 650.27 58.21 L 650.27 108.66 L 641.57 108.66 Z M 641.57 0 " fill="currentColor"/><path d="M 851.13 0 L 864.79 0 L 930.3 100.59 L 930.3 0 L 938.84 0 L 938.84 108.66 L 925.18 108.66 L 859.67 7.61 L 859.67 108.66 L 851.13 108.66 Z M 851.13 0 " fill="currentColor"/><path d="M 1110.21 8.23 L 1071.09 8.23 L 1071.09 0 L 1156.94 0 L 1156.94 8.23 L 1113.01 8.23 L 1119.06 18.79 L 1119.06 108.66 L 1110.21 108.66 Z M 1110.21 8.23 " fill="currentColor"/></svg></div><div class="s-gap" style="flex:2"></div><div class="s-sheet"><div class="s-sh-h">Choose an account<em>to continue to Ravent</em></div><div class="s-acct hot" data-exit="4"><b>J</b><span>Justin Tate<em>justin.tate@gmail.com</em></span><span class="s-ex" data-exit="4">4</span><span class="s-ex s-ex2" data-exit="4A">4A</span></div><div class="s-acct"><b>J</b><span>J. Tate (work)<em>jt@tateco.com</em></span></div><div class="s-acct add"><b>+</b><span>Use another account</span></div></div><div class="s-syscx hot" data-back="1">Cancel</div><div class="s-gap" style="flex:1"></div><div class="s-sys">System sheet — owned by Google, not designed by us. Ravent supplies only the app name and icon.</div></div>
+<div class="screen" data-step="01.B" hidden><div class="s-wm"><svg class="rv-logo" viewBox="0 0 1156.94 108.66" height="7" width="74.53" preserveAspectRatio="xMinYMid meet" aria-label="Ravent"><path d="M 0 0 L 45.64 0 C 66.59 0 78.24 15.37 78.24 32.75 C 78.24 50.61 66.13 62.4 51.23 64.58 L 44.86 64.58 L 79.32 108.66 L 68.77 108.66 L 29.65 57.59 L 42.84 57.59 C 58.05 57.59 69.39 48.28 69.39 32.75 C 69.39 19.56 61.47 8.07 45.17 8.07 L 8.69 8.07 L 8.69 108.66 L 0 108.66 Z M 0 0 " fill="currentColor"/><path d="M 250.23 0 L 263.12 0 L 306.74 108.66 L 297.58 108.66 L 286.09 80.57 L 245.57 80.57 L 240.92 72.5 L 283.3 72.5 L 256.6 6.52 L 215 108.66 L 205.84 108.66 Z M 250.23 0 " fill="currentColor"/><path d="M 414.47 0 L 423.63 0 L 463.05 101.21 L 502.8 0 L 511.8 0 L 469.42 108.66 L 456.69 108.66 Z M 414.47 0 " fill="currentColor"/><path d="M 662.06 100.44 L 716.39 100.44 L 716.39 108.66 L 666.88 108.66 Z M 641.57 0 L 716.39 0 L 716.39 8.23 L 650.27 8.23 L 650.27 50.3 L 710.19 50.3 L 710.19 58.21 L 650.27 58.21 L 650.27 108.66 L 641.57 108.66 Z M 641.57 0 " fill="currentColor"/><path d="M 851.13 0 L 864.79 0 L 930.3 100.59 L 930.3 0 L 938.84 0 L 938.84 108.66 L 925.18 108.66 L 859.67 7.61 L 859.67 108.66 L 851.13 108.66 Z M 851.13 0 " fill="currentColor"/><path d="M 1110.21 8.23 L 1071.09 8.23 L 1071.09 0 L 1156.94 0 L 1156.94 8.23 L 1113.01 8.23 L 1119.06 18.79 L 1119.06 108.66 L 1110.21 108.66 Z M 1110.21 8.23 " fill="currentColor"/></svg></div><div class="s-gap" style="flex:2"></div><div class="s-sheet"><div class="s-sh-h">Sign in with Apple<em>Do you want to sign in to Ravent?</em></div><div class="s-acct"><b></b><span>Justin Tate<em>justin@icloud.com</em></span></div><div class="s-opt"><b class="on"></b><span>Share My Email<em>justin@icloud.com</em></span></div><div class="s-opt"><b></b><span>Hide My Email<em>Forward to justin@icloud.com</em></span></div><div class="s-sh-f hot" data-exit="6"><div class="s-face"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#B7B4A3" stroke-width="1.4" stroke-linecap="round"><path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M20 16v2a2 2 0 0 1-2 2h-2"/><path d="M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 10v1"/><path d="M15 10v1"/><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/></svg></div><span>Confirm with Face ID</span><span class="s-ex" data-exit="6">6</span><span class="s-ex s-ex2" data-exit="6A">6A</span></div></div><div class="s-syscx hot" data-back="1">Cancel</div><div class="s-gap" style="flex:1"></div><div class="s-sys">System sheet — owned by Apple. Hide My Email means Ravent may never see a real address.</div></div>
+<div class="screen" data-step="01.C" hidden><div class="s-rndrow"><em class="s-rnd hot" data-back="1">‹</em></div><div class="s-gap" style="flex:1"></div><div class="s-eye">CHECK YOUR EMAIL</div><div class="s-disp sm">We’ve sent you a link.</div><div class="s-body">Tap it and you’re in. There is no password to set, and none to forget.</div><div class="s-card"><div class="s-ct">justin.tate@gmail.com</div><div class="s-cs">The link works for ten minutes</div></div><div class="s-gap" style="flex:2"></div><div class="s-tiny hot" data-say="A new link is on its way">Send it again</div><div class="s-tiny">Wrong address? Go back and change it</div></div>
+<div class="screen" data-step="01.D" hidden><div class="s-gap" style="flex:2"></div><div class="s-eye">FIRST TIME HERE</div><div class="s-disp sm">What should we call you?</div><div class="s-body">A first name is enough. It is only used so Ravent sounds less like a machine.</div><div class="s-inp"><i>FIRST NAME</i><span class="">Justin</span></div><div class="s-hint">You can change this later, or leave it out entirely.</div><div class="s-gap" style="flex:2"></div><div class="s-btn primary hot" data-exit="11">Continue<span class="s-ex" data-exit="11">11</span><span class="s-ex s-ex2" data-exit="11A">11A</span></div><div class="s-tiny hot" data-exit="11">Skip for now<span class="s-ex" data-exit="11">11</span><span class="s-ex s-ex2" data-exit="11A">11A</span></div></div>
+<div class="screen" data-step="01.E" hidden><div class="s-wm"><svg class="rv-logo" viewBox="0 0 1156.94 108.66" height="7" width="74.53" preserveAspectRatio="xMinYMid meet" aria-label="Ravent"><path d="M 0 0 L 45.64 0 C 66.59 0 78.24 15.37 78.24 32.75 C 78.24 50.61 66.13 62.4 51.23 64.58 L 44.86 64.58 L 79.32 108.66 L 68.77 108.66 L 29.65 57.59 L 42.84 57.59 C 58.05 57.59 69.39 48.28 69.39 32.75 C 69.39 19.56 61.47 8.07 45.17 8.07 L 8.69 8.07 L 8.69 108.66 L 0 108.66 Z M 0 0 " fill="currentColor"/><path d="M 250.23 0 L 263.12 0 L 306.74 108.66 L 297.58 108.66 L 286.09 80.57 L 245.57 80.57 L 240.92 72.5 L 283.3 72.5 L 256.6 6.52 L 215 108.66 L 205.84 108.66 Z M 250.23 0 " fill="currentColor"/><path d="M 414.47 0 L 423.63 0 L 463.05 101.21 L 502.8 0 L 511.8 0 L 469.42 108.66 L 456.69 108.66 Z M 414.47 0 " fill="currentColor"/><path d="M 662.06 100.44 L 716.39 100.44 L 716.39 108.66 L 666.88 108.66 Z M 641.57 0 L 716.39 0 L 716.39 8.23 L 650.27 8.23 L 650.27 50.3 L 710.19 50.3 L 710.19 58.21 L 650.27 58.21 L 650.27 108.66 L 641.57 108.66 Z M 641.57 0 " fill="currentColor"/><path d="M 851.13 0 L 864.79 0 L 930.3 100.59 L 930.3 0 L 938.84 0 L 938.84 108.66 L 925.18 108.66 L 859.67 7.61 L 859.67 108.66 L 851.13 108.66 Z M 851.13 0 " fill="currentColor"/><path d="M 1110.21 8.23 L 1071.09 8.23 L 1071.09 0 L 1156.94 0 L 1156.94 8.23 L 1113.01 8.23 L 1119.06 18.79 L 1119.06 108.66 L 1110.21 108.66 Z M 1110.21 8.23 " fill="currentColor"/></svg></div><div class="s-gap" style="flex:2"></div><div class="s-disp">We couldn&#x27;t sign you in.</div><div class="s-body">A provider didn&#x27;t hand you back to Ravent, or the link you tapped had already expired. Nothing was lost.</div><div class="s-eye">WHAT WE KNOW</div><div class="s-card"><div class="s-ct">The sign-in did not complete</div><div class="s-cs">No account was created, and a fresh link can be sent to the same address.</div></div><div class="s-gap" style="flex:2"></div><div class="s-btn primary hot" data-exit="12">Try again<span class="s-ex" data-exit="12">12</span></div><div class="s-tiny hot" data-back="1">Use a different way to sign in</div></div>
+<div class="screen" data-step="02" hidden><div class="s-wm"><svg class="rv-logo" viewBox="0 0 1156.94 108.66" height="7" width="74.53" preserveAspectRatio="xMinYMid meet" aria-label="Ravent"><path d="M 0 0 L 45.64 0 C 66.59 0 78.24 15.37 78.24 32.75 C 78.24 50.61 66.13 62.4 51.23 64.58 L 44.86 64.58 L 79.32 108.66 L 68.77 108.66 L 29.65 57.59 L 42.84 57.59 C 58.05 57.59 69.39 48.28 69.39 32.75 C 69.39 19.56 61.47 8.07 45.17 8.07 L 8.69 8.07 L 8.69 108.66 L 0 108.66 Z M 0 0 " fill="currentColor"/><path d="M 250.23 0 L 263.12 0 L 306.74 108.66 L 297.58 108.66 L 286.09 80.57 L 245.57 80.57 L 240.92 72.5 L 283.3 72.5 L 256.6 6.52 L 215 108.66 L 205.84 108.66 Z M 250.23 0 " fill="currentColor"/><path d="M 414.47 0 L 423.63 0 L 463.05 101.21 L 502.8 0 L 511.8 0 L 469.42 108.66 L 456.69 108.66 Z M 414.47 0 " fill="currentColor"/><path d="M 662.06 100.44 L 716.39 100.44 L 716.39 108.66 L 666.88 108.66 Z M 641.57 0 L 716.39 0 L 716.39 8.23 L 650.27 8.23 L 650.27 50.3 L 710.19 50.3 L 710.19 58.21 L 650.27 58.21 L 650.27 108.66 L 641.57 108.66 Z M 641.57 0 " fill="currentColor"/><path d="M 851.13 0 L 864.79 0 L 930.3 100.59 L 930.3 0 L 938.84 0 L 938.84 108.66 L 925.18 108.66 L 859.67 7.61 L 859.67 108.66 L 851.13 108.66 Z M 851.13 0 " fill="currentColor"/><path d="M 1110.21 8.23 L 1071.09 8.23 L 1071.09 0 L 1156.94 0 L 1156.94 8.23 L 1113.01 8.23 L 1119.06 18.79 L 1119.06 108.66 L 1110.21 108.66 Z M 1110.21 8.23 " fill="currentColor"/></svg><em>Justin</em></div><div class="s-gap" style="flex:2"></div><div class="s-eye">HELLO, JUSTIN · THE TATE RESIDENCE</div><div class="s-disp">How can I help you today?</div><div class="s-gap" style="flex:1"></div><div class="s-card hot" data-exit="14"><div class="s-ct">Fix a problem now</div><div class="s-cs">Get help with something that&#x27;s not working</div><span class="s-chev">›</span><span class="s-ex" data-exit="14">14</span></div><div class="s-card hot" data-exit="15"><div class="s-ct">Help Ravent learn your home</div><div class="s-cs">1–2 minutes · Speeds up future fixes</div><span class="s-chev">›</span><span class="s-ex" data-exit="15">15</span></div><div class="s-gap" style="flex:1"></div><div class="s-meta">· Last issue resolved: TV audio · 2 days ago</div><div class="s-meta">· Last setup update: Confirmed 2 devices · last week</div><div class="s-rule"></div><div class="s-grp"><div class="s-row hot" data-exit="16"><span>Your sessions<em>4 so far</em></span><span class="s-chev">›</span><span class="s-ex" data-exit="16">16</span></div><div class="s-row hot" data-exit="17"><span>Settings &amp; account</span><span class="s-chev">›</span><span class="s-ex" data-exit="17">17</span></div></div><div class="s-tabbar"><div class="s-tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg><span>Ask</span></div><div class="s-tab hot" data-exit="16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Sessions</span><span class="s-ex" data-exit="16">16</span></div><div class="s-tab hot" data-exit="23"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1z"/></svg><span>My Home</span><span class="s-ex" data-exit="23">23</span></div><div class="s-tab hot" data-exit="17"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><span>Account</span><span class="s-ex" data-exit="17">17</span></div></div></div>
+<div class="screen" data-step="02·alt" hidden><div class="s-wm"><svg class="rv-logo" viewBox="0 0 1156.94 108.66" height="7" width="74.53" preserveAspectRatio="xMinYMid meet" aria-label="Ravent"><path d="M 0 0 L 45.64 0 C 66.59 0 78.24 15.37 78.24 32.75 C 78.24 50.61 66.13 62.4 51.23 64.58 L 44.86 64.58 L 79.32 108.66 L 68.77 108.66 L 29.65 57.59 L 42.84 57.59 C 58.05 57.59 69.39 48.28 69.39 32.75 C 69.39 19.56 61.47 8.07 45.17 8.07 L 8.69 8.07 L 8.69 108.66 L 0 108.66 Z M 0 0 " fill="currentColor"/><path d="M 250.23 0 L 263.12 0 L 306.74 108.66 L 297.58 108.66 L 286.09 80.57 L 245.57 80.57 L 240.92 72.5 L 283.3 72.5 L 256.6 6.52 L 215 108.66 L 205.84 108.66 Z M 250.23 0 " fill="currentColor"/><path d="M 414.47 0 L 423.63 0 L 463.05 101.21 L 502.8 0 L 511.8 0 L 469.42 108.66 L 456.69 108.66 Z M 414.47 0 " fill="currentColor"/><path d="M 662.06 100.44 L 716.39 100.44 L 716.39 108.66 L 666.88 108.66 Z M 641.57 0 L 716.39 0 L 716.39 8.23 L 650.27 8.23 L 650.27 50.3 L 710.19 50.3 L 710.19 58.21 L 650.27 58.21 L 650.27 108.66 L 641.57 108.66 Z M 641.57 0 " fill="currentColor"/><path d="M 851.13 0 L 864.79 0 L 930.3 100.59 L 930.3 0 L 938.84 0 L 938.84 108.66 L 925.18 108.66 L 859.67 7.61 L 859.67 108.66 L 851.13 108.66 Z M 851.13 0 " fill="currentColor"/><path d="M 1110.21 8.23 L 1071.09 8.23 L 1071.09 0 L 1156.94 0 L 1156.94 8.23 L 1113.01 8.23 L 1119.06 18.79 L 1119.06 108.66 L 1110.21 108.66 Z M 1110.21 8.23 " fill="currentColor"/></svg></div><div class="s-gap" style="flex:3"></div><div class="s-centre">What&#x27;s going on at the Tate Residence, Justin?</div><div class="s-starts"><div class="s-start hot" data-exit="18"><span>Fix a problem</span><span class="s-ex" data-exit="18">18</span></div><div class="s-start hot" data-exit="19"><span>Help Ravent learn your home<em>1–2 minutes</em></span><span class="s-ex" data-exit="19">19</span></div></div><div class="s-gap" style="flex:4"></div><div class="s-resume hot" data-exit="20"><b>Still open</b><span>TV audio · saved 2 days ago</span><span class="s-ex" data-exit="20">20</span></div><div class="s-comp hot" data-exit="18"><span>…or describe it in your own words</span><b data-exit="83" class="s-tool hot" title="Point it at something and Ravent reads it"><svg class="s-ic2" width="12.5" height="12.5" viewBox="-0.6 -0.6 25.2 25.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 12.4 v4.1 A2.5 2.5 0 0 1 14.5 19 H3.5 A2.5 2.5 0 0 1 1 16.5 v-7 A2.5 2.5 0 0 1 3.5 7 h1.5 l1.15-2.1 h5.2 l1.15 2.1 h1.5"/><circle cx="9" cy="13" r="3.5"/><path d="M18.9 2.3999999999999995 Q19.56 6.14 23.299999999999997 6.8 Q19.56 7.46 18.9 11.2 Q18.24 7.46 14.499999999999998 6.8 Q18.24 6.14 18.9 2.3999999999999995 Z" fill="currentColor" stroke="none"/><path d="M22.4 0.2999999999999998 Q22.729999999999997 2.07 24.5 2.4 Q22.729999999999997 2.73 22.4 4.5 Q22.07 2.73 20.299999999999997 2.4 Q22.07 2.07 22.4 0.2999999999999998 Z" fill="currentColor" stroke="none"/></svg><span class="s-ex" data-exit="83">83</span></b><span class="s-ex" data-exit="18">18</span></div><div class="s-tabbar"><div class="s-tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg><span>Ask</span></div><div class="s-tab hot" data-exit="20"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Sessions</span><span class="s-ex" data-exit="20">20</span></div><div class="s-tab hot" data-exit="21"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1z"/></svg><span>My Home</span><span class="s-ex" data-exit="21">21</span></div><div class="s-tab hot" data-exit="22"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><span>Account</span><span class="s-ex" data-exit="22">22</span></div></div></div>
+<div class="screen" data-step="02.B" hidden><div class="s-wm"><svg class="rv-logo" viewBox="0 0 1156.94 108.66" height="7" width="74.53" preserveAspectRatio="xMinYMid meet" aria-label="Ravent"><path d="M 0 0 L 45.64 0 C 66.59 0 78.24 15.37 78.24 32.75 C 78.24 50.61 66.13 62.4 51.23 64.58 L 44.86 64.58 L 79.32 108.66 L 68.77 108.66 L 29.65 57.59 L 42.84 57.59 C 58.05 57.59 69.39 48.28 69.39 32.75 C 69.39 19.56 61.47 8.07 45.17 8.07 L 8.69 8.07 L 8.69 108.66 L 0 108.66 Z M 0 0 " fill="currentColor"/><path d="M 250.23 0 L 263.12 0 L 306.74 108.66 L 297.58 108.66 L 286.09 80.57 L 245.57 80.57 L 240.92 72.5 L 283.3 72.5 L 256.6 6.52 L 215 108.66 L 205.84 108.66 Z M 250.23 0 " fill="currentColor"/><path d="M 414.47 0 L 423.63 0 L 463.05 101.21 L 502.8 0 L 511.8 0 L 469.42 108.66 L 456.69 108.66 Z M 414.47 0 " fill="currentColor"/><path d="M 662.06 100.44 L 716.39 100.44 L 716.39 108.66 L 666.88 108.66 Z M 641.57 0 L 716.39 0 L 716.39 8.23 L 650.27 8.23 L 650.27 50.3 L 710.19 50.3 L 710.19 58.21 L 650.27 58.21 L 650.27 108.66 L 641.57 108.66 Z M 641.57 0 " fill="currentColor"/><path d="M 851.13 0 L 864.79 0 L 930.3 100.59 L 930.3 0 L 938.84 0 L 938.84 108.66 L 925.18 108.66 L 859.67 7.61 L 859.67 108.66 L 851.13 108.66 Z M 851.13 0 " fill="currentColor"/><path d="M 1110.21 8.23 L 1071.09 8.23 L 1071.09 0 L 1156.94 0 L 1156.94 8.23 L 1113.01 8.23 L 1119.06 18.79 L 1119.06 108.66 L 1110.21 108.66 Z M 1110.21 8.23 " fill="currentColor"/></svg></div><div class="s-eye">YOUR SESSIONS</div><div class="s-disp sm">What we&#x27;ve worked on.</div><div class="s-grp"><div class="s-row"><span>Living room audio<em>2 days ago</em></span><b class="tag">RESOLVED</b></div><div class="s-row hot" data-exit="29"><span>Camera feed freezing<em>last week</em></span><b class="tag">SAVED</b><span class="s-ex" data-exit="29">29</span></div><div class="s-row"><span>WiFi in the den<em>3 weeks ago</em></span><b class="tag">RESOLVED</b></div><div class="s-row"><span>Thermostat unresponsive<em>last month</em></span><b class="tag">RESOLVED</b></div></div><div class="s-gap" style="flex:1"></div><div class="s-tabbar"><div class="s-tab hot" data-exit="25"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg><span>Ask</span><span class="s-ex" data-exit="25">25</span></div><div class="s-tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Sessions</span></div><div class="s-tab hot" data-exit="77"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1z"/></svg><span>My Home</span><span class="s-ex" data-exit="77">77</span></div><div class="s-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><span>Account</span></div></div></div>
+<div class="screen" data-step="02.C" hidden><div class="s-wm"><svg class="rv-logo" viewBox="0 0 1156.94 108.66" height="7" width="74.53" preserveAspectRatio="xMinYMid meet" aria-label="Ravent"><path d="M 0 0 L 45.64 0 C 66.59 0 78.24 15.37 78.24 32.75 C 78.24 50.61 66.13 62.4 51.23 64.58 L 44.86 64.58 L 79.32 108.66 L 68.77 108.66 L 29.65 57.59 L 42.84 57.59 C 58.05 57.59 69.39 48.28 69.39 32.75 C 69.39 19.56 61.47 8.07 45.17 8.07 L 8.69 8.07 L 8.69 108.66 L 0 108.66 Z M 0 0 " fill="currentColor"/><path d="M 250.23 0 L 263.12 0 L 306.74 108.66 L 297.58 108.66 L 286.09 80.57 L 245.57 80.57 L 240.92 72.5 L 283.3 72.5 L 256.6 6.52 L 215 108.66 L 205.84 108.66 Z M 250.23 0 " fill="currentColor"/><path d="M 414.47 0 L 423.63 0 L 463.05 101.21 L 502.8 0 L 511.8 0 L 469.42 108.66 L 456.69 108.66 Z M 414.47 0 " fill="currentColor"/><path d="M 662.06 100.44 L 716.39 100.44 L 716.39 108.66 L 666.88 108.66 Z M 641.57 0 L 716.39 0 L 716.39 8.23 L 650.27 8.23 L 650.27 50.3 L 710.19 50.3 L 710.19 58.21 L 650.27 58.21 L 650.27 108.66 L 641.57 108.66 Z M 641.57 0 " fill="currentColor"/><path d="M 851.13 0 L 864.79 0 L 930.3 100.59 L 930.3 0 L 938.84 0 L 938.84 108.66 L 925.18 108.66 L 859.67 7.61 L 859.67 108.66 L 851.13 108.66 Z M 851.13 0 " fill="currentColor"/><path d="M 1110.21 8.23 L 1071.09 8.23 L 1071.09 0 L 1156.94 0 L 1156.94 8.23 L 1113.01 8.23 L 1119.06 18.79 L 1119.06 108.66 L 1110.21 108.66 Z M 1110.21 8.23 " fill="currentColor"/></svg></div><div class="s-eye">SETTINGS</div><div class="s-disp sm">Your account.</div><div class="s-grp"><div class="s-row"><span>Account<em>kalpesh@…</em></span><span class="s-chev">›</span></div><div class="s-row hot" data-exit="78"><span>Home<em>The Tate Residence · 2 more</em></span><span class="s-chev">›</span><span class="s-ex" data-exit="78">78</span></div><div class="s-row"><span>People with access<em>2 people</em></span><span class="s-chev">›</span></div><div class="s-row"><span>Privacy &amp; data<em>What Ravent keeps</em></span><span class="s-chev">›</span></div><div class="s-row"><span>Plan<em>Starter</em></span><span class="s-chev">›</span></div></div><div class="s-gap" style="flex:1"></div><div class="s-tabbar"><div class="s-tab hot" data-exit="27"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg><span>Ask</span><span class="s-ex" data-exit="27">27</span></div><div class="s-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Sessions</span></div><div class="s-tab hot" data-exit="78"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1z"/></svg><span>My Home</span><span class="s-ex" data-exit="78">78</span></div><div class="s-tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><span>Account</span></div></div></div>
+<div class="screen" data-step="02.D" hidden><div class="s-wm"><svg class="rv-logo" viewBox="0 0 1156.94 108.66" height="7" width="74.53" preserveAspectRatio="xMinYMid meet" aria-label="Ravent"><path d="M 0 0 L 45.64 0 C 66.59 0 78.24 15.37 78.24 32.75 C 78.24 50.61 66.13 62.4 51.23 64.58 L 44.86 64.58 L 79.32 108.66 L 68.77 108.66 L 29.65 57.59 L 42.84 57.59 C 58.05 57.59 69.39 48.28 69.39 32.75 C 69.39 19.56 61.47 8.07 45.17 8.07 L 8.69 8.07 L 8.69 108.66 L 0 108.66 Z M 0 0 " fill="currentColor"/><path d="M 250.23 0 L 263.12 0 L 306.74 108.66 L 297.58 108.66 L 286.09 80.57 L 245.57 80.57 L 240.92 72.5 L 283.3 72.5 L 256.6 6.52 L 215 108.66 L 205.84 108.66 Z M 250.23 0 " fill="currentColor"/><path d="M 414.47 0 L 423.63 0 L 463.05 101.21 L 502.8 0 L 511.8 0 L 469.42 108.66 L 456.69 108.66 Z M 414.47 0 " fill="currentColor"/><path d="M 662.06 100.44 L 716.39 100.44 L 716.39 108.66 L 666.88 108.66 Z M 641.57 0 L 716.39 0 L 716.39 8.23 L 650.27 8.23 L 650.27 50.3 L 710.19 50.3 L 710.19 58.21 L 650.27 58.21 L 650.27 108.66 L 641.57 108.66 Z M 641.57 0 " fill="currentColor"/><path d="M 851.13 0 L 864.79 0 L 930.3 100.59 L 930.3 0 L 938.84 0 L 938.84 108.66 L 925.18 108.66 L 859.67 7.61 L 859.67 108.66 L 851.13 108.66 Z M 851.13 0 " fill="currentColor"/><path d="M 1110.21 8.23 L 1071.09 8.23 L 1071.09 0 L 1156.94 0 L 1156.94 8.23 L 1113.01 8.23 L 1119.06 18.79 L 1119.06 108.66 L 1110.21 108.66 Z M 1110.21 8.23 " fill="currentColor"/></svg></div><div class="s-eye">YOUR HOMES</div><div class="s-disp sm">Where we’ve looked.</div><div class="s-body">Each home keeps its own rooms, devices and history. Switching home changes what Ravent talks about.</div><div class="s-grp"><div class="s-row"><span>The Tate Residence<em>14 things · looked 3 days ago</em></span><b class="tag">NOW</b></div><div class="s-row hot" data-exit="80"><span>The Barn<em>6 things · looked in June</em></span><span class="s-chev">›</span><span class="s-ex" data-exit="80">80</span></div><div class="s-row"><span>Mum’s house<em>not looked at yet</em></span><b class="tag">TO DO</b></div></div><div class="s-gap" style="flex:1"></div><div class="s-btn primary hot" data-exit="79">Add a home<span class="s-ex" data-exit="79">79</span></div><div class="s-tiny">A home is only looked at while you’re on its Wi-Fi</div><div class="s-tabbar"><div class="s-tab hot" data-exit="26"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg><span>Ask</span><span class="s-ex" data-exit="26">26</span></div><div class="s-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Sessions</span></div><div class="s-tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1z"/></svg><span>My Home</span></div><div class="s-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><span>Account</span></div></div></div>
+<div class="screen" data-step="02.E" hidden><div class="s-rndrow both"><em class="s-rnd hot" data-back="1">‹</em><span></span><em class="s-rnd x hot" data-exit="88">✕<span class="s-ex" data-exit="88">88</span></em></div><div class="s-vf"><div class="shelf"></div><div class="obj"></div><div class="s-ret"><i></i><i></i><i></i><i></i><em>HOLD STILL · READING</em></div></div><div class="s-cam"><b class="s-cbtn big hot" data-exit="84"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.6"/><path d="M15.4 15.4 L21 21"/></svg><span class="s-ex" data-exit="84">84</span></b><b class="s-cbtn hot" data-exit="85"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.4"/><circle cx="8.6" cy="10" r="1.7"/><path d="M4 17l5-4.6 4 3.4 3-2.4 4 3.6"/></svg><span class="s-ex" data-exit="85">85</span></b></div><div class="s-tiny">Point it at a device, or choose a photo you already have</div></div>
+<div class="screen" data-step="02.F" hidden><div class="s-rndrow end"><em class="s-rnd x hot" data-back="1">✕</em></div><div class="s-pnav"><span class="seg"><b class="on">Photos</b><b>Collections</b></span></div><div class="s-pbanner"><b>Ravent can only access the items you select</b><em>Your library is shown here. Nothing leaves the picker unless you choose it.</em></div><div class="s-pgrid"><i class="sel"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="s-gap" style="flex:1"></div><div class="s-tiny hot" data-exit="86">Choose a photo<span class="s-ex" data-exit="86">86</span></div><div class="s-sys">System picker — Apple’s, not designed by us. Ravent supplies nothing to this screen.</div></div>
+<div class="screen" data-step="02.G" hidden><div class="s-rndrow"><em class="s-rnd hot" data-back="1">‹</em></div><div class="s-eye">WHAT WE THINK THIS IS</div><div class="s-disp sm">Is it one of these?</div><div class="s-match hot" data-exit="87"><span class="thumb"></span><span><b>AV receiver · 7.2 channel</b><em>Living room · by the shelf</em></span><span class="conf">LIKELY</span><span class="s-ex" data-exit="87">87</span></div><div class="s-match hot" data-exit="87"><span class="thumb"></span><span><b>Soundbar</b><em>Slim, wall-mounted</em></span><span class="conf">PROBABLY</span><span class="s-ex" data-exit="87">87</span></div><div class="s-match hot" data-exit="87"><span class="thumb"></span><span><b>Streaming box</b><em>Small, matte black</em></span><span class="conf lo">STILL LEARNING</span><span class="s-ex" data-exit="87">87</span></div><div class="s-gap" style="flex:1"></div><div class="s-tiny hot" data-exit="87">None of these · describe it instead<span class="s-ex" data-exit="87">87</span></div></div>
+<div class="screen" data-step="03" hidden><div class="s-rndrow"><em class="s-rnd hot" data-back="1">‹</em><span class="s-rndlab">STEP 1 OF 3</span></div><div class="s-disp sm">What&#x27;s going on?</div><div class="s-area">Describe what&#x27;s not working…</div><div class="s-duo"><span class="">📷  Photo</span><span class="">⌨  Type</span></div><div class="s-eye">OR TRY</div><div class="s-chip">TV has no sound</div><div class="s-chip">WiFi keeps disconnecting</div><div class="s-chip">Sonos isn&#x27;t playing</div><div class="s-gap" style="flex:1"></div><div class="s-btn dark hot" data-exit="31">Continue<span class="s-ex" data-exit="31">31</span></div></div>
+<div class="screen" data-step="04" hidden><div class="s-rndrow both"><em class="s-rnd hot" data-back="1">‹</em><span class="s-rndlab mid">STEP 2 OF 3</span><i class="s-skip hot" data-exit="32">SKIP<span class="s-ex" data-exit="32">32</span></i></div><div class="s-disp sm">A bit of context.</div><div class="s-body">Optional — helps us guide you faster. Skip anything you&#x27;re not sure about.</div><div class="s-duo"><span class="">Which room?</span><span class="">NOT SURE</span></div><div class="s-field">e.g. Bedroom</div><div class="s-duo"><span class="">Which device?</span><span class="">NOT SURE</span></div><div class="s-field">e.g. Sonos Arc</div><div class="s-gap" style="flex:1"></div><div class="s-btn primary hot" data-exit="33">Start troubleshooting<span class="s-ex" data-exit="33">33</span></div></div>
+<div class="screen" data-step="05" hidden><div class="s-rndrow"><em class="s-rnd hot" data-back="1">‹</em><span class="s-rndlab">STEP 3 · TRY 1 OF 3</span></div><div class="s-prog"><i class="on"></i><i class=""></i><i class=""></i></div><div class="s-quote"><div>“Sonos audio in living room dropped”</div><em>Living room · Sonos Arc</em></div><div class="s-eye">LIKELY CAUSE</div><div class="s-body">Your TV often loses sound when AirPlay hands off mid-session. The receiver hasn&#x27;t fully released the audio stream.</div><div class="s-eye">TRY THIS</div><div class="s-card"><div class="s-ct">On the Apple TV remote, hold the TV button for 2 seconds, then tap Audio Output. Switch from your Sonos to TV Speakers, wait 3 seconds, then switch back.</div></div><div class="s-body">Is sound playing through your Sonos again?</div><div class="s-btn primary hot" data-exit="35">That fixed it<span class="s-ex" data-exit="35">35</span></div><div class="s-btn dark hot" data-exit="34">Still not working<span class="s-ex" data-exit="34">34</span></div><div class="s-tiny hot" data-exit="36">Save this for me<span class="s-ex" data-exit="36">36</span></div></div>
+<div class="screen" data-step="05.E" hidden><div class="s-wm"><svg class="rv-logo" viewBox="0 0 1156.94 108.66" height="7" width="74.53" preserveAspectRatio="xMinYMid meet" aria-label="Ravent"><path d="M 0 0 L 45.64 0 C 66.59 0 78.24 15.37 78.24 32.75 C 78.24 50.61 66.13 62.4 51.23 64.58 L 44.86 64.58 L 79.32 108.66 L 68.77 108.66 L 29.65 57.59 L 42.84 57.59 C 58.05 57.59 69.39 48.28 69.39 32.75 C 69.39 19.56 61.47 8.07 45.17 8.07 L 8.69 8.07 L 8.69 108.66 L 0 108.66 Z M 0 0 " fill="currentColor"/><path d="M 250.23 0 L 263.12 0 L 306.74 108.66 L 297.58 108.66 L 286.09 80.57 L 245.57 80.57 L 240.92 72.5 L 283.3 72.5 L 256.6 6.52 L 215 108.66 L 205.84 108.66 Z M 250.23 0 " fill="currentColor"/><path d="M 414.47 0 L 423.63 0 L 463.05 101.21 L 502.8 0 L 511.8 0 L 469.42 108.66 L 456.69 108.66 Z M 414.47 0 " fill="currentColor"/><path d="M 662.06 100.44 L 716.39 100.44 L 716.39 108.66 L 666.88 108.66 Z M 641.57 0 L 716.39 0 L 716.39 8.23 L 650.27 8.23 L 650.27 50.3 L 710.19 50.3 L 710.19 58.21 L 650.27 58.21 L 650.27 108.66 L 641.57 108.66 Z M 641.57 0 " fill="currentColor"/><path d="M 851.13 0 L 864.79 0 L 930.3 100.59 L 930.3 0 L 938.84 0 L 938.84 108.66 L 925.18 108.66 L 859.67 7.61 L 859.67 108.66 L 851.13 108.66 Z M 851.13 0 " fill="currentColor"/><path d="M 1110.21 8.23 L 1071.09 8.23 L 1071.09 0 L 1156.94 0 L 1156.94 8.23 L 1113.01 8.23 L 1119.06 18.79 L 1119.06 108.66 L 1110.21 108.66 Z M 1110.21 8.23 " fill="currentColor"/></svg></div><div class="s-gap" style="flex:2"></div><div class="s-disp">Something&#x27;s not right.</div><div class="s-body">We couldn&#x27;t reach Ravent just now. Nothing you&#x27;ve told us is lost — your session is saved and we&#x27;ll pick it up where you left off.</div><div class="s-gap" style="flex:2"></div><div class="s-btn primary hot" data-exit="38">Try again<span class="s-ex" data-exit="38">38</span></div><div class="s-btn dark">Back to home</div></div>
+<div class="screen" data-step="06.A" hidden><div class="s-wm"><svg class="rv-logo" viewBox="0 0 1156.94 108.66" height="7" width="74.53" preserveAspectRatio="xMinYMid meet" aria-label="Ravent"><path d="M 0 0 L 45.64 0 C 66.59 0 78.24 15.37 78.24 32.75 C 78.24 50.61 66.13 62.4 51.23 64.58 L 44.86 64.58 L 79.32 108.66 L 68.77 108.66 L 29.65 57.59 L 42.84 57.59 C 58.05 57.59 69.39 48.28 69.39 32.75 C 69.39 19.56 61.47 8.07 45.17 8.07 L 8.69 8.07 L 8.69 108.66 L 0 108.66 Z M 0 0 " fill="currentColor"/><path d="M 250.23 0 L 263.12 0 L 306.74 108.66 L 297.58 108.66 L 286.09 80.57 L 245.57 80.57 L 240.92 72.5 L 283.3 72.5 L 256.6 6.52 L 215 108.66 L 205.84 108.66 Z M 250.23 0 " fill="currentColor"/><path d="M 414.47 0 L 423.63 0 L 463.05 101.21 L 502.8 0 L 511.8 0 L 469.42 108.66 L 456.69 108.66 Z M 414.47 0 " fill="currentColor"/><path d="M 662.06 100.44 L 716.39 100.44 L 716.39 108.66 L 666.88 108.66 Z M 641.57 0 L 716.39 0 L 716.39 8.23 L 650.27 8.23 L 650.27 50.3 L 710.19 50.3 L 710.19 58.21 L 650.27 58.21 L 650.27 108.66 L 641.57 108.66 Z M 641.57 0 " fill="currentColor"/><path d="M 851.13 0 L 864.79 0 L 930.3 100.59 L 930.3 0 L 938.84 0 L 938.84 108.66 L 925.18 108.66 L 859.67 7.61 L 859.67 108.66 L 851.13 108.66 Z M 851.13 0 " fill="currentColor"/><path d="M 1110.21 8.23 L 1071.09 8.23 L 1071.09 0 L 1156.94 0 L 1156.94 8.23 L 1113.01 8.23 L 1119.06 18.79 L 1119.06 108.66 L 1110.21 108.66 Z M 1110.21 8.23 " fill="currentColor"/></svg></div><div class="s-gap" style="flex:2"></div><div class="s-check">✓</div><div class="s-disp">Glad that&#x27;s sorted.</div><div class="s-body">Ravent learned a little about your setup along the way. Want to make future support faster?</div><div class="s-card"><div class="s-ct">Help Ravent learn your home</div><div class="s-cs">A quick scan and a few questions. Optional, anytime.</div></div><div class="s-btn dark hot" data-exit="42">Take a minute<span class="s-ex" data-exit="42">42</span></div><div class="s-gap" style="flex:3"></div><div class="s-btn dark hot" data-exit="43">Back to home<span class="s-ex" data-exit="43">43</span></div></div>
+<div class="screen" data-step="06.B" hidden><div class="s-wm"><svg class="rv-logo" viewBox="0 0 1156.94 108.66" height="7" width="74.53" preserveAspectRatio="xMinYMid meet" aria-label="Ravent"><path d="M 0 0 L 45.64 0 C 66.59 0 78.24 15.37 78.24 32.75 C 78.24 50.61 66.13 62.4 51.23 64.58 L 44.86 64.58 L 79.32 108.66 L 68.77 108.66 L 29.65 57.59 L 42.84 57.59 C 58.05 57.59 69.39 48.28 69.39 32.75 C 69.39 19.56 61.47 8.07 45.17 8.07 L 8.69 8.07 L 8.69 108.66 L 0 108.66 Z M 0 0 " fill="currentColor"/><path d="M 250.23 0 L 263.12 0 L 306.74 108.66 L 297.58 108.66 L 286.09 80.57 L 245.57 80.57 L 240.92 72.5 L 283.3 72.5 L 256.6 6.52 L 215 108.66 L 205.84 108.66 Z M 250.23 0 " fill="currentColor"/><path d="M 414.47 0 L 423.63 0 L 463.05 101.21 L 502.8 0 L 511.8 0 L 469.42 108.66 L 456.69 108.66 Z M 414.47 0 " fill="currentColor"/><path d="M 662.06 100.44 L 716.39 100.44 L 716.39 108.66 L 666.88 108.66 Z M 641.57 0 L 716.39 0 L 716.39 8.23 L 650.27 8.23 L 650.27 50.3 L 710.19 50.3 L 710.19 58.21 L 650.27 58.21 L 650.27 108.66 L 641.57 108.66 Z M 641.57 0 " fill="currentColor"/><path d="M 851.13 0 L 864.79 0 L 930.3 100.59 L 930.3 0 L 938.84 0 L 938.84 108.66 L 925.18 108.66 L 859.67 7.61 L 859.67 108.66 L 851.13 108.66 Z M 851.13 0 " fill="currentColor"/><path d="M 1110.21 8.23 L 1071.09 8.23 L 1071.09 0 L 1156.94 0 L 1156.94 8.23 L 1113.01 8.23 L 1119.06 18.79 L 1119.06 108.66 L 1110.21 108.66 Z M 1110.21 8.23 " fill="currentColor"/></svg></div><div class="s-gap" style="flex:2"></div><div class="s-disp">Saved for you.</div><div class="s-body">We&#x27;ll keep this in mind for next time. If a similar issue comes up, Ravent will pick up where we left off — no need to start from scratch.</div><div class="s-eye">WHAT WE NOTED</div><div class="s-card"><div class="s-ct">Living room audio · Sonos and Apple TV handoff · attempted three diagnostic steps</div></div><div class="s-tiny hot" data-exit="75">Have someone reach out<span class="s-ex" data-exit="75">75</span></div><div class="s-tiny hot" data-exit="45">Copy a summary to hand on<span class="s-ex" data-exit="45">45</span></div><div class="s-tiny hot" data-exit="44">A person takes it on  ·  Care<span class="s-ex" data-exit="44">44</span></div><div class="s-gap" style="flex:3"></div><div class="s-btn dark hot" data-exit="47">Back to home<span class="s-ex" data-exit="47">47</span></div></div>
+<div class="screen" data-step="06.C" hidden><div class="s-rndrow end"><em class="s-rnd x hot" data-exit="49">✕<span class="s-ex" data-exit="49">49</span></em></div><div class="s-eye">CARE</div><div class="s-disp sm">Someone&#x27;s taking this on.</div><div class="s-body">We&#x27;ve passed everything across — the steps you tried, and what we know about your home. You won&#x27;t need to explain it again.</div><div class="s-card"><div class="s-ct">Living room audio</div><div class="s-cs">Picked up · we&#x27;ll be in touch today</div></div><div class="s-gap" style="flex:2"></div><div class="s-btn dark">Back to home</div></div>
+<div class="screen" data-step="06.D" hidden><div class="s-rndrow end"><em class="s-rnd x hot" data-exit="41">✕<span class="s-ex" data-exit="41">41</span></em></div><div class="s-eye">WHERE YOU LEFT OFF</div><div class="s-disp sm">Still the living room audio?</div><div class="s-body">You stepped away about forty minutes ago. Nothing is lost — we kept the two things we had already tried.</div><div class="s-card"><div class="s-ct">Living room audio · Sonos and Apple TV</div><div class="s-cs">Two steps tried · paused 40 minutes ago</div></div><div class="s-gap" style="flex:2"></div><div class="s-btn primary hot" data-exit="40">Pick it up<span class="s-ex" data-exit="40">40</span></div><div class="s-btn dark hot" data-exit="41">Start something else<span class="s-ex" data-exit="41">41</span></div><div class="s-tiny">We’ll hold on to this for seven days</div></div>
+<div class="screen" data-step="06.E" hidden><div class="s-rndrow end"><em class="s-rnd x hot" data-exit="46">✕<span class="s-ex" data-exit="46">46</span></em></div><div class="s-eye">WHERE TO GO NEXT</div><div class="s-disp sm">Sonos can take it from here.</div><div class="s-body">We could not settle this one. Sonos support handles the Arc directly, and this is everything we tried, ready to hand over.</div><div class="s-card"><div class="s-ct">Sonos · Support</div><div class="s-cs">The Arc is theirs — start here</div></div><div class="s-card"><div class="s-ct">Apple · Support</div><div class="s-cs">If the Apple TV turns out to be the cause</div></div><div class="s-gap" style="flex:1"></div><div class="s-pre">RAVENT · SUPPORT SUMMARY<br>Ref RV-2261-04 · 14 May<br><br>Issue  Living room audio drops when the TV<br>       hands back to the Sonos<br>Home   The Tate Residence<br>Room   Living room<br>Kit    Sonos Arc · Apple TV 4K · eero (3)<br><br>Tried  1  AirPlay handoff reset<br>       2  Audio output switched and returned<br>       3  Receiver power cycle<br><br>State  Unresolved after three attempts</div><div class="s-btn primary hot" data-copy="RAVENT · SUPPORT SUMMARY&#10;Ref RV-2261-04 · 14 May&#10;&#10;Issue  Living room audio drops when the TV&#10;       hands back to the Sonos&#10;Home   The Tate Residence&#10;Room   Living room&#10;Kit    Sonos Arc · Apple TV 4K · eero (3)&#10;&#10;Tried  1  AirPlay handoff reset&#10;       2  Audio output switched and returned&#10;       3  Receiver power cycle&#10;&#10;State  Unresolved after three attempts">Copy summary</div><div class="s-tiny">We keep a record of this so Ravent gets better at it. Nobody will contact you.</div></div>
+<div class="screen" data-step="07" hidden><div class="s-eye">HELP RAVENT LEARN YOUR HOME</div><div class="s-disp">A few minutes now means faster help later.</div><div class="s-body">We&#x27;ll name this home, take a quick look around it, and ask a couple of questions. You can stop anytime — nothing has to be perfect.</div><div class="s-meta">· Name this home</div><div class="s-meta">· Quick home check</div><div class="s-meta">· A few simple questions</div><div class="s-meta">· An evolving picture of your home</div><div class="s-gap" style="flex:2"></div><div class="s-btn primary hot" data-exit="58">Start setup<span class="s-ex" data-exit="58">58</span></div><div class="s-tiny hot" data-back="1">Maybe later</div></div>
+<div class="screen" data-step="07.E" hidden><div class="s-rndrow"><em class="s-rnd hot" data-back="1">‹</em></div><div class="s-eye">BEFORE WE LOOK</div><div class="s-disp sm">What should we call this home?</div><div class="s-body">Anything you’d say out loud. It only has to make sense to you.</div><div class="s-field">The Tate Residence</div><div class="s-chip">Home</div><div class="s-chip">The Barn</div><div class="s-chip">Mum’s house</div><div class="s-chip">The apartment</div><div class="s-gap" style="flex:2"></div><div class="s-btn primary hot" data-exit="81">Look around now<span class="s-ex" data-exit="81">81</span></div><div class="s-tiny hot" data-exit="82">I’m not there right now · create it and look later<span class="s-ex" data-exit="82">82</span></div></div>
+<div class="screen" data-step="07.A" hidden><div class="s-rndrow"><em class="s-rnd hot" data-back="1">‹</em></div><div class="s-eye">LOOKING AROUND · THE TATE RESIDENCE</div><div class="s-disp sm">Having a quiet look.</div><div class="s-body">This is passive. Nothing is saved until you confirm it.</div><div class="s-grp"><div class="s-gl">FOUND SO FAR</div><div class="s-row"><span>Apple TV<em>living room</em></span><b class="md">● PROBABLY</b></div><div class="s-row"><span>Sonos Arc<em>living room</em></span><b class="md">● PROBABLY</b></div><div class="s-row"><span>eero<em>hallway</em></span><b class="md">● PROBABLY</b></div><div class="s-row"><span>Smart speaker<em>kitchen</em></span><b class="lo">● STILL LEARNING</b></div></div><div class="s-gap" style="flex:1"></div><div class="s-tiny">What we can see from your network is a best guess, not a live status — we can’t tell you a device is working</div><div class="s-btn dark hot" data-exit="59">Next<span class="s-ex" data-exit="59">59</span></div><div class="s-tiny">Skip for now</div></div>
+<div class="screen" data-step="07.B" hidden><div class="s-rndrow"><em class="s-rnd hot" data-back="1">‹</em></div><div class="s-disp sm">Three quick things.</div><div class="s-body">Skip anything you&#x27;re not sure about.</div><div class="s-eye">WHAT DO YOU USE?</div><div class="s-chip">AV &amp; theater</div><div class="s-chip">Networking</div><div class="s-chip">Lighting</div><div class="s-chip">Security</div><div class="s-eye">PRIMARY ROOM?</div><div class="s-chip">Living room</div><div class="s-chip">Den</div><div class="s-chip">Bedroom</div><div class="s-eye">DEDICATED THEATER?</div><div class="s-chip">Yes</div><div class="s-chip">No</div><div class="s-chip">Not sure</div><div class="s-gap" style="flex:1"></div><div class="s-btn primary hot" data-exit="60">Continue<span class="s-ex" data-exit="60">60</span></div></div>
+<div class="screen" data-step="07.C" hidden><div class="s-rndrow"><em class="s-rnd hot" data-back="1">‹</em></div><div class="s-eye">FIRST DRAFT</div><div class="s-disp sm">Here&#x27;s what Ravent&#x27;s started to understand.</div><div class="s-body">Tap to confirm. Tap to refine. Swipe a row away if it&#x27;s not yours.</div><div class="s-hint">Incomplete is fine. Ravent will keep learning.</div><div class="s-grp"><div class="s-gl">LIVING ROOM</div><div class="s-row"><span>TV</span><b class="hi">● CONFIRMED</b></div><div class="s-row"><span>Apple TV</span><b class="hi">● CONFIRMED</b></div><div class="s-row"><span>Sonos Arc</span><b class="md">● PROBABLY</b></div></div><div class="s-grp"><div class="s-gl">BEDROOM</div><div class="s-row"><span>Sonos Arc<em>still verifying</em></span><b class="lo">● STILL LEARNING</b></div></div><div class="s-grp"><div class="s-gl">KITCHEN</div><div class="s-row"><span>Smart speaker</span><b class="md">● PROBABLY</b></div></div><div class="s-btn dark">+ Add a room</div><div class="s-tiny hot" data-exit="61">Something missing?<span class="s-ex" data-exit="61">61</span></div><div class="s-btn primary hot" data-exit="65">Done<span class="s-ex" data-exit="65">65</span></div></div>
+<div class="screen" data-step="07.D" hidden><div class="s-rndrow both"><em class="s-rnd hot" data-back="1">‹</em><span></span><em class="s-rnd x hot" data-exit="64">✕<span class="s-ex" data-exit="64">64</span></em></div><div class="s-disp sm">Tell Ravent what&#x27;s missing.</div><div class="s-body">Show it or type it. Whatever&#x27;s easiest.</div><div class="s-area">There&#x27;s a Sonos Beam in the kitchen…</div><div class="s-duo"><span class="">📷  Show</span><span class="">⌨  Type</span></div><div class="s-gap" style="flex:1"></div><div class="s-hint">Examples: “Apple TV in the bedroom” · “Sonos outside” · “router in the office”</div><div class="s-tiny hot" data-exit="63">Let Maya handle this  ·  Concierge<span class="s-ex" data-exit="63">63</span></div></div>
+<div class="screen" data-step="08" hidden><div class="s-wm"><svg class="rv-logo" viewBox="0 0 1156.94 108.66" height="7" width="74.53" preserveAspectRatio="xMinYMid meet" aria-label="Ravent"><path d="M 0 0 L 45.64 0 C 66.59 0 78.24 15.37 78.24 32.75 C 78.24 50.61 66.13 62.4 51.23 64.58 L 44.86 64.58 L 79.32 108.66 L 68.77 108.66 L 29.65 57.59 L 42.84 57.59 C 58.05 57.59 69.39 48.28 69.39 32.75 C 69.39 19.56 61.47 8.07 45.17 8.07 L 8.69 8.07 L 8.69 108.66 L 0 108.66 Z M 0 0 " fill="currentColor"/><path d="M 250.23 0 L 263.12 0 L 306.74 108.66 L 297.58 108.66 L 286.09 80.57 L 245.57 80.57 L 240.92 72.5 L 283.3 72.5 L 256.6 6.52 L 215 108.66 L 205.84 108.66 Z M 250.23 0 " fill="currentColor"/><path d="M 414.47 0 L 423.63 0 L 463.05 101.21 L 502.8 0 L 511.8 0 L 469.42 108.66 L 456.69 108.66 Z M 414.47 0 " fill="currentColor"/><path d="M 662.06 100.44 L 716.39 100.44 L 716.39 108.66 L 666.88 108.66 Z M 641.57 0 L 716.39 0 L 716.39 8.23 L 650.27 8.23 L 650.27 50.3 L 710.19 50.3 L 710.19 58.21 L 650.27 58.21 L 650.27 108.66 L 641.57 108.66 Z M 641.57 0 " fill="currentColor"/><path d="M 851.13 0 L 864.79 0 L 930.3 100.59 L 930.3 0 L 938.84 0 L 938.84 108.66 L 925.18 108.66 L 859.67 7.61 L 859.67 108.66 L 851.13 108.66 Z M 851.13 0 " fill="currentColor"/><path d="M 1110.21 8.23 L 1071.09 8.23 L 1071.09 0 L 1156.94 0 L 1156.94 8.23 L 1113.01 8.23 L 1119.06 18.79 L 1119.06 108.66 L 1110.21 108.66 Z M 1110.21 8.23 " fill="currentColor"/></svg><em>JUSTIN</em></div><div class="s-gap" style="flex:3"></div><div class="s-eye">FRIDAY EVENING</div><div class="s-disp">The Tate Residence.</div><div class="s-gap" style="flex:3"></div><div class="s-rule"></div><div class="s-body hot" data-exit="67">Last looked in on Tuesday. Nothing has been reported since.<span class="s-ex" data-exit="67">67</span></div><div class="s-body hot" data-exit="70">Maya is around if you need her.<span class="s-ex" data-exit="70">70</span></div><div class="s-tiny hot" data-exit="66">TAP ANYWHERE IF SOMETHING NEEDS ATTENTION<span class="s-ex" data-exit="66">66</span></div></div>
+<div class="screen" data-step="08.A" hidden><div class="s-rndrow end"><em class="s-rnd x hot" data-exit="71">✕<span class="s-ex" data-exit="71">71</span></em></div><div class="s-eye">YOUR HOME</div><div class="s-disp">Everything looks healthy.</div><div class="s-body">We haven&#x27;t seen anything worth raising. Here&#x27;s what we&#x27;ve quietly noticed in passing.</div><div class="s-eye">RELIABILITY</div><div class="s-card"><div class="s-ct">Your network has been steady</div><div class="s-cs">No interruptions worth raising.</div></div><div class="s-card"><div class="s-ct">Living room TV and speakers</div><div class="s-cs">Working as expected.</div></div><div class="s-eye">RECOMMENDATIONS</div><div class="s-card"><div class="s-ct">Sonos Arc · reliability improvement available</div><div class="s-cs">We can apply this quietly when the room is calm.</div></div><div class="s-eye">WHAT WE&#x27;RE LEARNING</div><div class="s-card"><div class="s-ct">Your living room setup</div><div class="s-cs">We&#x27;ve noticed how your TV and Sonos work together. Future support will be faster.</div></div><div class="s-gap" style="flex:1"></div></div>
+<div class="screen" data-step="08.B" hidden><div class="s-rndrow"><em class="s-rnd hot" data-exit="72">‹<span class="s-ex" data-exit="72">72</span></em></div><div class="s-eye">YOUR HOME</div><div class="s-disp">What we understand so far.</div><div class="s-body">Quietly evolving. The more we help, the clearer this gets.</div><div class="s-grp"><div class="s-gl">LIVING ROOM</div><div class="s-row"><span>TV</span><b class="hi">● CONFIRMED</b></div><div class="s-row"><span>Sonos Arc</span><b class="hi">● CONFIRMED</b></div><div class="s-row"><span>Apple TV</span><b class="md">● LIKELY</b></div></div><div class="s-grp"><div class="s-gl">BEDROOM</div><div class="s-row"><span>Sony TV</span><b class="hi">● CONFIRMED</b></div><div class="s-row"><span>HomePod</span><b class="md">● LIKELY</b></div></div><div class="s-grp"><div class="s-gl">FRONT DOOR</div><div class="s-row"><span>Doorbell camera</span><b class="hi">● CONFIRMED</b></div></div><div class="s-gap" style="flex:1"></div><div class="s-hint">Ravent will keep refining this as we help. You don&#x27;t need to maintain it.</div></div>
+<div class="screen" data-step="08.C" hidden><div class="s-rndrow"><em class="s-rnd hot" data-exit="73">‹<span class="s-ex" data-exit="73">73</span></em></div><div class="s-eye">YOUR HOME</div><div class="s-disp">The full picture.</div><div class="s-body">Rooms, systems and how they connect — kept current by Ravent, not by you.</div><div class="s-grp"><div class="s-gl">SYSTEMS</div><div class="s-row"><span>Network<em>eero · 3 nodes</em></span><b class="hi">● CONFIRMED</b></div><div class="s-row"><span>Theater<em>Sonos Arc · Apple TV · projector</em></span><b class="hi">● CONFIRMED</b></div><div class="s-row"><span>Security<em>Doorbell camera · front door</em></span><b class="hi">● CONFIRMED</b></div></div><div class="s-grp"><div class="s-gl">ROOMS</div><div class="s-row"><span>Living room<em>4 devices</em></span></div><div class="s-row"><span>Bedroom<em>2 devices</em></span></div><div class="s-row"><span>Kitchen<em>1 device</em></span></div><div class="s-row"><span>Front door<em>1 device</em></span></div></div><div class="s-gap" style="flex:1"></div><div class="s-hint">Maintained for you. Nothing here needs your attention.</div></div>
+<div class="screen" data-step="08.D" hidden><div class="s-rndrow end"><em class="s-rnd x hot" data-exit="74">✕<span class="s-ex" data-exit="74">74</span></em></div><div class="s-av"><div class="s-avc">MR</div><div><div class="s-avn">Maya Rosenfeld</div><div class="s-avr">Your Ravent advisor</div></div></div><div class="s-rule"></div><div class="s-msg"><div class="s-mh">MAYA · A FEW DAYS AGO</div><div class="s-mb">A calm week for your home. I&#x27;ll plan to apply the Sonos improvement during your travel window in March.</div></div><div class="s-msg me"><div class="s-mh">YOU · EARLIER</div><div class="s-mb">Thanks Maya. That works.</div></div><div class="s-msg"><div class="s-mh">MAYA · LAST MONTH</div><div class="s-mb">Doorbell camera replaced. Coordinated with the installer — you shouldn&#x27;t need to do anything.</div></div><div class="s-gap" style="flex:1"></div><div class="s-duo"><span class="">Write to Maya…</span><span class="">SEND</span></div></div>
+<div class="screen" data-step="03·alt" hidden><div class="s-rndrow both"><em class="s-rnd hot" data-goto="02·alt">‹</em><span></span><em class="s-rnd x hot" data-exit="57">✕<span class="s-ex" data-exit="57">57</span></em></div><div class="s-bub me">The Sonos in the living room keeps dropping</div><div class="s-bub">Got it — the Sonos Arc in the living room.</div><div class="s-bub">Is it connected through your TV, or running on its own?</div><div class="s-quicks"><span class="s-qk hot" data-exit="50">Through the TV<span class="s-ex" data-exit="50">50</span></span><span class="s-qk hot" data-exit="50">On its own<span class="s-ex" data-exit="50">50</span></span><span class="s-qk hot" data-exit="50">Not sure<span class="s-ex" data-exit="50">50</span></span></div><div class="s-gap" style="flex:1"></div><div class="s-comp"><span>Reply…</span><b class="s-tool" title="Point it at something and Ravent reads it"><svg class="s-ic2" width="12.5" height="12.5" viewBox="-0.6 -0.6 25.2 25.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 12.4 v4.1 A2.5 2.5 0 0 1 14.5 19 H3.5 A2.5 2.5 0 0 1 1 16.5 v-7 A2.5 2.5 0 0 1 3.5 7 h1.5 l1.15-2.1 h5.2 l1.15 2.1 h1.5"/><circle cx="9" cy="13" r="3.5"/><path d="M18.9 2.3999999999999995 Q19.56 6.14 23.299999999999997 6.8 Q19.56 7.46 18.9 11.2 Q18.24 7.46 14.499999999999998 6.8 Q18.24 6.14 18.9 2.3999999999999995 Z" fill="currentColor" stroke="none"/><path d="M22.4 0.2999999999999998 Q22.729999999999997 2.07 24.5 2.4 Q22.729999999999997 2.73 22.4 4.5 Q22.07 2.73 20.299999999999997 2.4 Q22.07 2.07 22.4 0.2999999999999998 Z" fill="currentColor" stroke="none"/></svg></b></div></div>
+<div class="screen" data-step="04·alt" hidden><div class="s-rndrow both"><em class="s-rnd hot" data-goto="02·alt">‹</em><span></span><em class="s-rnd x hot" data-goto="02·alt">✕</em></div><div class="s-bub me">Through the TV</div><div class="s-bub">Thanks. Does the sound drop during music too, or only when the TV is on?</div><div class="s-quicks"><span class="s-qk hot" data-exit="51">Only the TV<span class="s-ex" data-exit="51">51</span></span><span class="s-qk hot" data-exit="51">Music too<span class="s-ex" data-exit="51">51</span></span><span class="s-qk hot" data-exit="51">Not sure<span class="s-ex" data-exit="51">51</span></span></div><div class="s-gap" style="flex:1"></div><div class="s-comp"><span>Reply…</span><b class="s-tool" title="Point it at something and Ravent reads it"><svg class="s-ic2" width="12.5" height="12.5" viewBox="-0.6 -0.6 25.2 25.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 12.4 v4.1 A2.5 2.5 0 0 1 14.5 19 H3.5 A2.5 2.5 0 0 1 1 16.5 v-7 A2.5 2.5 0 0 1 3.5 7 h1.5 l1.15-2.1 h5.2 l1.15 2.1 h1.5"/><circle cx="9" cy="13" r="3.5"/><path d="M18.9 2.3999999999999995 Q19.56 6.14 23.299999999999997 6.8 Q19.56 7.46 18.9 11.2 Q18.24 7.46 14.499999999999998 6.8 Q18.24 6.14 18.9 2.3999999999999995 Z" fill="currentColor" stroke="none"/><path d="M22.4 0.2999999999999998 Q22.729999999999997 2.07 24.5 2.4 Q22.729999999999997 2.73 22.4 4.5 Q22.07 2.73 20.299999999999997 2.4 Q22.07 2.07 22.4 0.2999999999999998 Z" fill="currentColor" stroke="none"/></svg></b></div></div>
+<div class="screen" data-step="05·alt" hidden><div class="s-rndrow both"><em class="s-rnd hot" data-goto="02·alt">‹</em><span></span><em class="s-rnd x hot" data-goto="02·alt">✕</em></div><div class="s-bub me">Only the TV</div><div class="s-bub">That points at the AirPlay handoff. Your TV often keeps hold of the audio stream when it switches back.</div><div class="s-bub">On the Apple TV remote, hold the TV button for 2 seconds, then tap Audio Output. Switch to TV Speakers, wait 3 seconds, then switch back to the Sonos.</div><div class="s-bub">Did the sound come back?</div><div class="s-quicks"><span class="s-qk hot" data-exit="53">That fixed it<span class="s-ex" data-exit="53">53</span></span><span class="s-qk hot" data-exit="52">Still not working<span class="s-ex" data-exit="52">52</span></span><span class="s-qk hot" data-exit="54">Save this for me<span class="s-ex" data-exit="54">54</span></span></div><div class="s-gap" style="flex:1"></div><div class="s-comp"><span>Reply…</span><b class="s-tool" title="Point it at something and Ravent reads it"><svg class="s-ic2" width="12.5" height="12.5" viewBox="-0.6 -0.6 25.2 25.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 12.4 v4.1 A2.5 2.5 0 0 1 14.5 19 H3.5 A2.5 2.5 0 0 1 1 16.5 v-7 A2.5 2.5 0 0 1 3.5 7 h1.5 l1.15-2.1 h5.2 l1.15 2.1 h1.5"/><circle cx="9" cy="13" r="3.5"/><path d="M18.9 2.3999999999999995 Q19.56 6.14 23.299999999999997 6.8 Q19.56 7.46 18.9 11.2 Q18.24 7.46 14.499999999999998 6.8 Q18.24 6.14 18.9 2.3999999999999995 Z" fill="currentColor" stroke="none"/><path d="M22.4 0.2999999999999998 Q22.729999999999997 2.07 24.5 2.4 Q22.729999999999997 2.73 22.4 4.5 Q22.07 2.73 20.299999999999997 2.4 Q22.07 2.07 22.4 0.2999999999999998 Z" fill="currentColor" stroke="none"/></svg></b></div></div>
+<div class="screen" data-step="06·alt" hidden><div class="s-rndrow both"><em class="s-rnd hot" data-goto="02·alt">‹</em><span></span><em class="s-rnd x hot" data-goto="02·alt">✕</em></div><div class="s-bub me">That fixed it</div><div class="s-bub">Glad that&#x27;s sorted.</div><div class="s-bub">Ravent picked up a little about your setup along the way.<em>Apple TV · Sonos Arc · living room</em></div><div class="s-quicks"><span class="s-qk hot" data-exit="55">Help Ravent learn your home<span class="s-ex" data-exit="55">55</span></span><span class="s-qk hot" data-exit="56">Done for now<span class="s-ex" data-exit="56">56</span></span></div><div class="s-gap" style="flex:1"></div><div class="s-comp"><span>Anything else?</span><b class="s-tool" title="Point it at something and Ravent reads it"><svg class="s-ic2" width="12.5" height="12.5" viewBox="-0.6 -0.6 25.2 25.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 12.4 v4.1 A2.5 2.5 0 0 1 14.5 19 H3.5 A2.5 2.5 0 0 1 1 16.5 v-7 A2.5 2.5 0 0 1 3.5 7 h1.5 l1.15-2.1 h5.2 l1.15 2.1 h1.5"/><circle cx="9" cy="13" r="3.5"/><path d="M18.9 2.3999999999999995 Q19.56 6.14 23.299999999999997 6.8 Q19.56 7.46 18.9 11.2 Q18.24 7.46 14.499999999999998 6.8 Q18.24 6.14 18.9 2.3999999999999995 Z" fill="currentColor" stroke="none"/><path d="M22.4 0.2999999999999998 Q22.729999999999997 2.07 24.5 2.4 Q22.729999999999997 2.73 22.4 4.5 Q22.07 2.73 20.299999999999997 2.4 Q22.07 2.07 22.4 0.2999999999999998 Z" fill="currentColor" stroke="none"/></svg></b></div></div></div><div id="mark"><b></b><span></span></div></div>
+<div id="dead"></div>
+<div id="sheet"><div id="sheetin">
+  <h4>Every screen<em>tap to jump — the failure states and deep views cannot be reached by tapping alone</em></h4>
+  <div id="list"></div>
+</div></div>
+<div id="grip"></div>
+<div id="bar">
+  <button id="back">‹</button>
+  <div id="sw"><button data-m="a" class="on">ORIGINAL</button><button data-m="b">ALTERNATIVE</button></div>
+  <button id="tags" class="on">◆</button>
+  <button id="taps">taps</button>
+  <button id="nx">what next ▸</button>
+  <button id="idx">☰</button>
+  <span id="now"></span>
+</div>
+<script>
+const M = {"edges": {"1": ["01", "01.A"], "2": ["01", "01.B"], "3": ["01", "01.C"], "4": ["01.A", "02"], "4A": ["01.A", "02·alt"], "5": ["01.A", "01.E"], "6": ["01.B", "02"], "6A": ["01.B", "02·alt"], "7": ["01.B", "01.E"], "8": ["01.C", "02"], "8A": ["01.C", "02·alt"], "9": ["01.C", "01.D"], "10": ["01.C", "01.E"], "11": ["01.D", "02"], "11A": ["01.D", "02·alt"], "12": ["01.E", "01"], "13": ["02", "02·alt"], "14": ["02", "03"], "15": ["02", "07"], "16": ["02", "02.B"], "17": ["02", "02.C"], "18": ["02·alt", "03·alt"], "19": ["02·alt", "07"], "20": ["02·alt", "02.B"], "21": ["02·alt", "02.D"], "22": ["02·alt", "02.C"], "23": ["02", "02.D"], "24": ["02.C", "01"], "25": ["02.B", "02"], "26": ["02.D", "02·alt"], "27": ["02.C", "02·alt"], "28": ["02.B", "02"], "29": ["02.B", "06.D"], "30": ["02.C", "02"], "31": ["03", "04"], "32": ["04", "05"], "33": ["04", "05"], "34": ["05", "05"], "35": ["05", "06.A"], "36": ["05", "06.B"], "37": ["05", "05.E"], "38": ["05.E", "05"], "39": ["05", "06.D"], "40": ["06.D", "05"], "41": ["06.D", "02"], "42": ["06.A", "07"], "43": ["06.A", "08"], "44": ["06.B", "06.C"], "45": ["06.B", "06.E"], "75": ["06.B", "06.E"], "76": ["06.E", "02"], "54A": ["06·alt", "06.E"], "77": ["02.B", "02.D"], "78": ["02.C", "02.D"], "79": ["02.D", "07.E"], "80": ["02.D", "02"], "81": ["07.E", "07.A"], "82": ["07.E", "02.D"], "83": ["02·alt", "02.E"], "84": ["02.E", "02.G"], "85": ["02.E", "02.F"], "86": ["02.F", "02.G"], "87": ["02.G", "03·alt"], "88": ["02.E", "02·alt"], "46": ["06.E", "06.B"], "47": ["06.B", "08"], "48": ["06.B", "02"], "49": ["06.C", "08"], "50": ["03·alt", "04·alt"], "51": ["04·alt", "05·alt"], "52": ["05·alt", "05·alt"], "53": ["05·alt", "06·alt"], "54": ["05·alt", "06.B"], "55": ["06·alt", "07"], "56": ["06·alt", "02·alt"], "57": ["03·alt", "02·alt"], "58": ["07", "07.E"], "59": ["07.A", "07.B"], "60": ["07.B", "07.C"], "61": ["07.C", "07.D"], "62": ["07.D", "07.C"], "63": ["07.D", "08.D"], "64": ["07.D", "07.C"], "65": ["07.C", "08"], "66": ["08", "02"], "67": ["08", "08.A"], "68": ["08.A", "08.B"], "69": ["08.B", "08.C"], "70": ["08", "08.D"], "71": ["08.A", "08"], "72": ["08.B", "08.A"], "73": ["08.C", "08.B"], "74": ["08.D", "08"]}, "track": {"01": "t", "01.A": "t", "01.B": "t", "01.C": "t", "01.D": "t", "01.E": "t", "02": "a", "02·alt": "b", "02.B": "t", "02.C": "t", "02.D": "t", "02.E": "b", "02.F": "b", "02.G": "b", "03": "a", "04": "a", "05": "a", "05.E": "a", "06.A": "a", "06.B": "t", "06.C": "t", "06.D": "t", "06.E": "t", "07": "t", "07.E": "t", "07.A": "t", "07.B": "t", "07.C": "t", "07.D": "t", "08": "t", "08.A": "t", "08.B": "t", "08.C": "t", "08.D": "t", "03·alt": "b", "04·alt": "b", "05·alt": "b", "06·alt": "b"}, "pair": {"02": "02·alt", "03": "03·alt", "04": "04·alt", "05": "05·alt", "06.A": "06·alt", "02·alt": "02", "03·alt": "03", "04·alt": "04", "05·alt": "05", "06·alt": "06.A", "02.A": "02"}, "title": {"01": "Sign in", "01.A": "Continue with Google", "01.B": "Continue with Apple", "01.C": "Check your email", "01.D": "What we call you", "01.E": "We couldn't sign you in", "02": "Entry", "02·alt": "Entry — ambient", "02.B": "Your sessions", "02.C": "Settings & account", "02.D": "Your homes", "02.E": "Reading the room", "02.F": "Your photos", "02.G": "What we think this is", "03": "Describe", "04": "Add context", "05": "Diagnose", "05.E": "Error & offline", "06.A": "Resolved", "06.B": "Saved for you", "06.C": "A person takes it on", "06.D": "Paused", "06.E": "Support summary", "07": "Setup intro", "07.E": "Name this home", "07.A": "Quick look", "07.B": "Questions", "07.C": "Confirm pass", "07.D": "Memory capture", "08": "The home at rest", "08.A": "Home Review", "08.B": "What Ravent Understands", "08.C": "Home Profile", "08.D": "Advisor thread", "03·alt": "Describe — in the thread", "04·alt": "Context — in the thread", "05·alt": "Diagnose — in the thread", "06·alt": "Resolved — in the thread"}, "sub": {"01": "Google, Apple, or your email", "01.A": "system sheet, not ours", "01.B": "system sheet · Hide My Email", "01.C": "one screen, new or returning", "01.D": "first run only · skippable", "01.E": "what happened, and how to retry", "02": "cards — as the design study draws it", "02·alt": "ALTERNATIVE · one question, one field", "02.B": "what we've worked on", "02.C": "incl. the only sign-out path", "02.D": "one person, more than one home", "02.E": "ALTERNATIVE · the camera, pointed", "02.F": "system picker · Apple's, not ours", "02.G": "ALTERNATIVE · matches to confirm", "03": "step 1 of 3 — text or photo", "04": "step 2 of 3 — optional, skippable", "05": "step 3 — try 1…3 of 3", "05.E": "when the loop cannot continue", "06.A": "“Glad that’s sorted.”", "06.B": "“We’ll keep this in mind.”", "06.C": "Care and above", "06.D": "what you come back to", "06.E": "the copyable hand-off", "07": "sheet · “Maybe later”", "07.E": "before anything is looked at", "07.A": "passive · suggestions only", "07.B": "three light probes", "07.C": "tap confirm · swipe dismiss", "07.D": "show · type", "08": "ambient · Assist and above", "08.A": "“Everything looks healthy”", "08.B": "memory, room by room", "08.C": "the home, in full", "08.D": "“Maya is around”", "03·alt": "ALTERNATIVE · one window, scrolled", "04·alt": "ALTERNATIVE · quick replies, no form", "05·alt": "ALTERNATIVE · the fix as a message", "06·alt": "ALTERNATIVE · it just carries on"}, "mark": {"01": "", "01.A": "gap", "01.B": "gap", "01.C": "gap", "01.D": "gap", "01.E": "gap", "02": "", "02·alt": "ours", "02.B": "gap", "02.C": "gap", "02.D": "gap", "02.E": "ours", "02.F": "gap", "02.G": "ours", "03": "", "04": "", "05": "", "05.E": "gap", "06.A": "", "06.B": "", "06.C": "gap", "06.D": "gap", "06.E": "gap", "07": "", "07.E": "gap", "07.A": "", "07.B": "", "07.C": "", "07.D": "", "08": "", "08.A": "", "08.B": "", "08.C": "", "08.D": "", "03·alt": "ours", "04·alt": "ours", "05·alt": "ours", "06·alt": "ours"}, "next": {"01": [["01.A", "Continue with Google"], ["01.B", "Continue with Apple"], ["01.C", "Types an email, taps go"]], "01.A": [["02", "Picks an account"], ["02·alt", "Picks an account"], ["01.E", "The handoff fails, or never returns"]], "01.B": [["02", "Confirms with Face ID"], ["02·alt", "Confirms with Face ID"], ["01.E", "Cancelled, or the sheet fails"]], "01.C": [["02", "Opens the link · a known address"], ["02·alt", "Opens the link · a known address"], ["01.D", "Opens the link · a new address"], ["01.E", "The link expires, or never arrives"]], "01.D": [["02", "Name given, or skipped"], ["02·alt", "Name given, or skipped"]], "01.E": [["01", "“Try again”"]], "02": [["02·alt", "—"], ["03", "“Fix a problem now”"], ["07", "“Help Ravent learn your home”"], ["02.B", "“Your sessions”"], ["02.C", "“Settings & account”"], ["02.D", "“My Home” in the tab bar"]], "02·alt": [["03·alt", "Types into the composer, or taps “Fix a problem”"], ["07", "“Help Ravent learn your home”"], ["02.B", "Taps the open item"], ["02.D", "“My Home” in the tab bar"], ["02.C", "“Account” in the tab bar"], ["02.E", "Taps the camera in the composer"]], "02.C": [["01", "“Sign out”"], ["02·alt", "“Ask” in the tab bar"], ["02", "✕ Close"], ["02.D", "Taps the Home row"]], "02.B": [["02", "“Ask” in the tab bar"], ["02", "✕ Close"], ["06.D", "Taps a saved session"], ["02.D", "“My Home” in the tab bar"]], "02.D": [["02·alt", "“Ask” in the tab bar"], ["07.E", "“Add a home”"], ["02", "Picks a home, or ✕ Close"]], "03": [["04", "Continue"]], "04": [["05", "“SKIP” in the header"], ["05", "“Start troubleshooting”"]], "05": [["06.A", "“That fixed it”"], ["06.B", "Third attempt reached, or “Save this for me”"], ["05.E", "The service fails mid-loop"], ["06.D", "Leaves mid-loop, comes back later"]], "05.E": [["05", "“Try again”"]], "06.D": [["05", "“Pick it up”"], ["02", "“Start something else”"]], "06.A": [["07", "“Take a minute” nudge"], ["08", "Back to home — Assist and above"]], "06.B": [["06.C", "Care and above — “Have someone take this on”"], ["06.E", "“Copy a summary to hand on”"], ["06.E", "“Where to go next”"], ["08", "Back to home — Assist and above"], ["02", "A later issue"]], "06.E": [["02", "“Start something else”"], ["06.B", "✕ Close"]], "06·alt": [["06.E", "“Where to go next” in the thread"], ["07", "“Help Ravent learn your home”"], ["02·alt", "“Done for now”"]], "07.E": [["07.A", "“Look around now”"], ["02.D", "“I'm not there right now”"]], "02.E": [["02.G", "Locks onto something in the room"], ["02.F", "Taps the photo icon"], ["02·alt", "✕ Close"]], "02.F": [["02.G", "Picks a photo"]], "02.G": [["03·alt", "Picks a match, or none of them"]], "06.C": [["08", "Back to home"]], "03·alt": [["04·alt", "Taps a quick reply"], ["02·alt", "✕ Close"]], "04·alt": [["05·alt", "Taps a quick reply"]], "05·alt": [["06·alt", "“That fixed it”"], ["06.B", "Third attempt, or “Save this for me”"]], "07": [["07.E", "“Start setup”"]], "07.A": [["07.B", "Next"]], "07.B": [["07.C", "Continue"]], "07.C": [["07.D", "“Something missing?”"], ["08", "“Done” — Assist and above"]], "07.D": [["07.C", "Confirmed and saved"], ["08.D", "“Let Maya handle this”"], ["07.C", "✕ Close"]], "08": [["02", "Tap anywhere · pull down"], ["08.A", "Tap the review card"], ["08.D", "Tap the advisor line"]], "08.A": [["08.B", "Open the memory view"], ["08", "✕ Close"]], "08.B": [["08.C", "Open the full profile"], ["08.A", "‹ Back"]], "08.C": [["08.B", "‹ Back"]], "08.D": [["08", "✕ Close"]]}};
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const SCR = {}; $$('.screen').forEach(s => SCR[s.dataset.step] = s);
+
+let mode = 'a', cur = null, stack = [], showTags = true;
+
+/* the design canvas is 260 wide; scale it to the device and let the flex gaps
+   absorb whatever height is left over */
+function fit(){
+  const cs = getComputedStyle($('#probe'));
+  const top = parseFloat(cs.paddingTop) || 0, bot = parseFloat(cs.paddingBottom) || 0;
+  const W = Math.min(window.innerWidth, 430);                 // phone-shaped on a laptop
+  const H = Math.min(window.innerHeight, Math.round(W * 844 / 390));
+  const k = W / 260, L = (window.innerWidth - W) / 2, T = (window.innerHeight - H) / 2;
+  const sc = $('#scaler');
+  sc.style.transform = 'scale(' + k + ')';
+  sc.style.left = L + 'px'; sc.style.top = T + 'px';
+  $('#stage').style.background = window.innerWidth > 430 ? '#141312' : '#0A0A0A';
+  const h = H / k;
+  $$('.screen').forEach(s => {
+    s.style.height = h + 'px';
+    s.style.paddingTop    = (top / k + 13) + 'px';
+    s.style.paddingBottom = (bot / k + 12) + 'px';
+  });
+  $('#mark').style.top   = (T + top + 10) + 'px';
+  $('#mark').style.right = (L + 10) + 'px';
+  $('#dead').style.bottom = (bot + 74) + 'px';
+}
+
+/* a control may lead to two places — the original and the alternative */
+function target(el){
+  const ids = new Set();
+  if(el.dataset.exit) ids.add(el.dataset.exit);
+  el.querySelectorAll('[data-exit]').forEach(x => ids.add(x.dataset.exit));
+  const opts = [...ids].map(i => M.edges[i]).filter(Boolean);
+  if(!opts.length) return null;
+  const mine  = opts.find(([,b]) => M.track[b] === mode);
+  const both  = opts.find(([,b]) => M.track[b] === 't');
+  let t = (mine || both || opts[0])[1];
+  if(M.track[t] !== 't' && M.track[t] !== mode && M.pair[t]) t = M.pair[t];
+  return t;
+}
+
+function say(t){
+  const d = $('#dead'); d.textContent = t; d.classList.add('on');
+  clearTimeout(say._t); say._t = setTimeout(() => d.classList.remove('on'), 1500);
+}
+
+function go(step, back){
+  if(!SCR[step]) return;
+  if(cur) SCR[cur].hidden = true;
+  const s = SCR[step];
+  s.hidden = false;
+  s.classList.remove('enter','back'); void s.offsetWidth;
+  s.classList.add(back ? 'back' : 'enter');
+  cur = step;
+  const m = $('#mark'), kind = M.mark[step];
+  m.className = kind && showTags ? kind + ' on' : '';
+  if(kind) m.querySelector('span').textContent = kind === 'gap' ? 'NOT DRAWN' : 'OUR PROPOSAL';
+  $('#now').textContent = step + '  ·  ' + M.title[step];
+  const stuck = !forwardControls(step).length;
+  $('#nx').classList.toggle('urge', stuck);
+  if(stuck){ bar(true); say('Nothing to tap here — use “what next”'); }
+  const t = M.track[step];
+  if(t !== 't' && t !== mode) setMode(t, true);
+}
+
+function push(step){ if(cur) stack.push(cur); go(step); }
+
+function setMode(m, quiet){
+  mode = m;
+  $$('#sw button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+  if(quiet) return;
+  const p = M.pair[cur];
+  if(cur && M.track[cur] !== 't' && M.track[cur] !== m && p) go(p);
+  else say(m === 'a' ? 'Original' : 'Alternative');
+}
+
+/* taps */
+$('#stage').addEventListener('click', ev => {
+  const el = ev.target.closest('.hot'); if(!el) return;
+  if(el.dataset.back !== undefined){                       // navigation chrome, not a transition
+    const p = stack.pop();
+    if(p) go(p, true); else say('Start of the journey');
+    return;
+  }
+  if(el.dataset.goto){ push(el.dataset.goto); return; }
+  if(el.dataset.say){ say(el.dataset.say); return; }
+  if(el.dataset.copy !== undefined){                       // doc 02 §7 — it really copies
+    const t = el.dataset.copy.split('&#10;').join(String.fromCharCode(10));
+    if(navigator.clipboard) navigator.clipboard.writeText(t).catch(()=>{});
+    say('Summary copied');
+    return;
+  }
+  const t = target(el);
+  if(t) push(t); else say('Nothing behind this one yet');
+}, true);
+$('#stage').addEventListener('click', ev => {   // tapped the screen, not a control
+  if(ev.target.closest('.hot')) return;
+  outcomes();                                   // whatever else can happen here
+});
+/* a screen you leave by an event, not a tap, offers its outcomes instead */
+function forwardControls(step){
+  const s = SCR[step]; if(!s) return [];
+  return [...s.querySelectorAll('.hot')].filter(el =>
+    el.dataset.back === undefined && !el.dataset.say && el.dataset.copy === undefined && target(el));
+}
+function outcomes(){
+  const covered = new Set(forwardControls(cur).map(target));
+  const opts = (M.next[cur] || [])
+    .filter(([b]) => M.track[b] === 't' || M.track[b] === mode)
+    .filter(([b]) => !covered.has(b));
+  if(!opts.length){ say('Everything here is on the screen'); return; }
+  const L = $('#list'); L.innerHTML = '';
+  $('#sheetin').querySelector('h4').innerHTML =
+    'What happens next<em>You do not tap your way off this screen — it is left by an event. Pick one to carry on.</em>';
+  opts.forEach(([b, act]) => {
+    const d = document.createElement('div');
+    d.className = 'ix ' + M.track[b];
+    d.innerHTML = '<b>' + b + '</b><span>' + act + '</span><i>' + M.title[b] + '</i>';
+    d.onclick = () => { $('#sheet').classList.remove('on'); push(b); };
+    L.appendChild(d);
+  });
+  $('#sheet').classList.add('on');
+}
+$('#back').onclick   = () => { const p = stack.pop(); if(p) go(p, true); else say('Start of the journey'); };
+$('#tags').onclick   = () => { showTags = !showTags; $('#tags').classList.toggle('on', showTags); go(cur); };
+$('#taps').onclick   = () => { document.body.classList.toggle('taps');
+                               $('#taps').classList.toggle('on', document.body.classList.contains('taps')); };
+$$('#sw button').forEach(b => b.onclick = () => setMode(b.dataset.m));
+
+/* the shell gets out of the way */
+let hideT;
+function bar(show){
+  $('#bar').classList.toggle('hide', !show);
+  clearTimeout(hideT);
+  if(show) hideT = setTimeout(() => $('#bar').classList.add('hide'), 3200);
+}
+$('#nx').onclick = outcomes;
+$('#idx').onclick = () => {
+  const L = $('#list'); L.innerHTML = '';
+  Object.keys(M.title).forEach(k => {
+    const d = document.createElement('div');
+    d.className = 'ix ' + M.track[k];
+    d.innerHTML = '<b>' + k + '</b><span>' + M.title[k] + '</span><i>' +
+                  (M.track[k]==='a' ? 'ORIGINAL' : M.track[k]==='b' ? 'ALTERNATIVE' : 'BOTH') +
+                  (M.mark[k] ? ' · ' + (M.mark[k]==='gap' ? 'NOT DRAWN' : 'OURS') : '') + '</i>';
+    d.onclick = () => { $('#sheet').classList.remove('on'); push(k); };
+    L.appendChild(d);
+  });
+  $('#sheetin').querySelector('h4').innerHTML =
+    'Every screen<em>Tap to jump — the failure states and deep views cannot be reached by tapping alone</em>';
+  $('#sheet').classList.add('on');
+};
+$('#sheet').onclick = ev => { if(ev.target.id === 'sheet') $('#sheet').classList.remove('on'); };
+$('#grip').onclick = () => bar(true);
+$('#stage').addEventListener('click', () => bar(true), true);
+
+/* swipe right anywhere to go back, the way iOS does it */
+let sx = 0, sy = 0;
+addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, {passive:true});
+addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - sx, dy = Math.abs(e.changedTouches[0].clientY - sy);
+  if(dx > 68 && dy < 46){ const p = stack.pop(); if(p) go(p, true); }
+}, {passive:true});
+
+addEventListener('resize', fit);
+addEventListener('orientationchange', () => setTimeout(fit, 120));
+fit(); go('01'); bar(true);
+</script></body></html>
